@@ -465,7 +465,27 @@ ModelImporter:
   - first:
       137: 13700008
     second: wood
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Andan_body__andan_body
+    second: {fileID: 2100000, guid: 086b41fe20b60fd4ebdb32435b141364, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Andan_face__andan_face
+    second: {fileID: 2100000, guid: 5c8bb66be48d7c74d86a0ec16d188a92, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material_003__andan_weapon
+    second: {fileID: 2100000, guid: f8addec8cff0a0f4f9e2f3277d916a12, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material_009__andan_hair
+    second: {fileID: 2100000, guid: 6f40852d9d6769d4d84fbe9fc5343d6a, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
