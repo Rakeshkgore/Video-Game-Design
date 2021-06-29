@@ -11,7 +11,7 @@ public class RhinoAI : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
     private GameObject player;
-    private Food[] foods;
+    private List<Food> foods;
     private State state;
 
     void Awake()
@@ -19,7 +19,7 @@ public class RhinoAI : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         player = GameObject.FindWithTag("Player");
-        foods = GameObject.FindObjectsOfType<Food>();
+        foods = new List<Food>(GameObject.FindObjectsOfType<Food>());
     }
 
     void Start()
@@ -37,7 +37,6 @@ public class RhinoAI : MonoBehaviour
     void Update()
     {
         state = state.Execute();
-        Debug.Log(state.GetType().Name);
         animator.SetFloat("speed", agent.velocity.magnitude / agent.speed);
         animator.SetBool("fighting", state is FightState);
         animator.SetBool("eating", state is EatState);
@@ -137,11 +136,13 @@ public class RhinoAI : MonoBehaviour
                 {
                     return new FightState(ai);
                 }
+
                 Food food;
                 if (target.TryGetComponent<Food>(out food))
                 {
                     return new EatState(ai, food);
                 }
+
                 return new IdleState(ai);
             }
 
@@ -195,6 +196,7 @@ public class RhinoAI : MonoBehaviour
             if (animatorState.IsTag("eat") && animatorState.normalizedTime >= 1)
             {
                 Destroy(food.gameObject);
+                ai.foods.Remove(food);
                 return new IdleState(ai);
             }
 
