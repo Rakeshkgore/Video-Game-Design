@@ -16,6 +16,7 @@ public class RootMotionControlScript : MonoBehaviour
     public float rootMovementSpeed = 1f;
     public float rootTurnSpeed = 1f;
 
+    public GroundCheck[] additionalGroundChecks = {};
 
     private Animator anim;
     private Rigidbody rbody;
@@ -43,7 +44,18 @@ public class RootMotionControlScript : MonoBehaviour
     {
         get
         {
-            return groundContactCount > 0;
+            if (groundContactCount > 0)
+            {
+                return true;
+            }
+            foreach (GroundCheck groundCheck in additionalGroundChecks)
+            {
+                if (groundCheck.IsGrounded)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
