@@ -1117,8 +1117,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14d33ad13d9ec794db97cc2d6681996b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animationSpeed: 1
-  rootMovementSpeed: 1
+  animationSpeed: 1.1
+  rootMovementSpeed: 1.1
   rootTurnSpeed: 1
   additionalGroundChecks:
   - {fileID: 1553482148}
@@ -1538,7 +1538,7 @@ GameObject:
   - component: {fileID: 740051780}
   m_Layer: 0
   m_Name: Cube (1)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1789,7 +1789,7 @@ GameObject:
   - component: {fileID: 781325725}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3409,7 +3409,7 @@ GameObject:
   - component: {fileID: 1340776156}
   m_Layer: 0
   m_Name: Cube (3)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3805,7 +3805,7 @@ GameObject:
   - component: {fileID: 1512082844}
   m_Layer: 0
   m_Name: Cube (2)
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

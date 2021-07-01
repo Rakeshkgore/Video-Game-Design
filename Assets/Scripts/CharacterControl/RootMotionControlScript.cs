@@ -220,6 +220,11 @@ public class RootMotionControlScript : MonoBehaviour
 
         }
 
+        if(collision.transform.gameObject.tag == "Wall")
+        {
+            anim.SetBool("isHit", true);
+        }
+
     }
 
     private void OnCollisionExit(Collision collision)
@@ -230,6 +235,10 @@ public class RootMotionControlScript : MonoBehaviour
             --groundContactCount;
         }
 
+        if (collision.transform.gameObject.tag == "Wall")
+        {
+            anim.SetBool("isHit", false);
+        }
     }
 
     public GameObject buttonObject;
