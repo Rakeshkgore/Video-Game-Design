@@ -29,7 +29,7 @@ public class CharacterInputController : MonoBehaviour {
         private set;
     }
 
-    public bool Action
+    public bool Bat
     {
         get;
         private set;
@@ -40,10 +40,15 @@ public class CharacterInputController : MonoBehaviour {
         get;
         private set;
     }
+    public bool Dive
+    {
+        get;
+        private set;
+    }
 
-        
 
-	void Update () {
+
+    void Update () {
 		
         //GetAxisRaw() so we can do filtering here instead of the InputManager
         float h = Input.GetAxisRaw("Horizontal");// setup h variable as our horizontal input axis
@@ -101,9 +106,9 @@ public class CharacterInputController : MonoBehaviour {
 
 
         //Capture "fire" button for action event
-        Action = Input.GetButtonDown("Fire1");
-
+        Bat = Input.GetButtonDown("Fire1");
         Jump = Input.GetButtonDown("Jump");
+        Dive = Input.GetButtonDown("Fire2");
 
 	}
 }
