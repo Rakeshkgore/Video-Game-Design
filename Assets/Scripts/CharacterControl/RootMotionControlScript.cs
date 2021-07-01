@@ -101,6 +101,7 @@ public class RootMotionControlScript : MonoBehaviour
         bool inputAction = false;
         bool doButtonPress = false;
         bool doMatchToButtonPress = false;
+        bool jump = false;
 
 
         if (cinput.enabled)
@@ -179,13 +180,17 @@ public class RootMotionControlScript : MonoBehaviour
             }
         }
 
-
+        if (cinput.Jump)
+        {
+            jump = true;
+        }
 
         anim.SetFloat("velx", inputTurn);
         anim.SetFloat("vely", inputForward);
         anim.SetBool("isFalling", !isGrounded);
         anim.SetBool("doButtonPress", doButtonPress);
         anim.SetBool("matchToButtonPress", doMatchToButtonPress);
+        anim.SetBool("jump", jump);
 
         //My additions to "add some tweaks to the playback of animations"
         anim.speed = animationSpeed;
@@ -253,18 +258,8 @@ public class RootMotionControlScript : MonoBehaviour
 
         bool isGrounded = IsGrounded || CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
 
-        if (isGrounded)
-        {
-            //use root motion as is if on the ground		
-            newRootPosition = anim.rootPosition;
-        }
-        else
-        {
-            //Simple trick to keep model from climbing other rigidbodies that aren't the ground
-            newRootPosition = new Vector3(anim.rootPosition.x, this.transform.position.y, anim.rootPosition.z);
-        }
-
-        //use rotational root motion as is
+        // use root motion as is
+        newRootPosition = anim.rootPosition;
         newRootRotation = anim.rootRotation;
 
         //TODO Here, you could scale the difference in position and rotation to make the character go faster or slower
