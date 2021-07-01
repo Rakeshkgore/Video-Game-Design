@@ -246,18 +246,8 @@ public class RootMotionControlScript : MonoBehaviour
 
         bool isGrounded = IsGrounded || CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
 
-        if (isGrounded)
-        {
-            //use root motion as is if on the ground		
-            newRootPosition = anim.rootPosition;
-        }
-        else
-        {
-            //Simple trick to keep model from climbing other rigidbodies that aren't the ground
-            newRootPosition = new Vector3(anim.rootPosition.x, this.transform.position.y, anim.rootPosition.z);
-        }
-
-        //use rotational root motion as is
+        // use root motion as is
+        newRootPosition = anim.rootPosition;
         newRootRotation = anim.rootRotation;
 
         //TODO Here, you could scale the difference in position and rotation to make the character go faster or slower
