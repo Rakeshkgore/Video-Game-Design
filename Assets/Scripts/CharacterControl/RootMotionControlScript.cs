@@ -15,6 +15,8 @@ public class RootMotionControlScript : MonoBehaviour
     public float animationSpeed = 1f;
     public float rootMovementSpeed = 1f;
     public float rootTurnSpeed = 1f;
+    public float inputForwardScaleInWater = 0.6f;
+    public float inputTurnScaleInWater = 0.6f;
 
     public GroundCheck[] additionalGroundChecks = {};
 
@@ -39,6 +41,7 @@ public class RootMotionControlScript : MonoBehaviour
 
 
     private int groundContactCount = 0;
+    private int waterContactCount = 0;
 
     public bool IsGrounded
     {
@@ -56,6 +59,14 @@ public class RootMotionControlScript : MonoBehaviour
                 }
             }
             return false;
+        }
+    }
+
+    public bool IsInWater
+    {
+        get
+        {
+            return waterContactCount > 0;
         }
     }
 
@@ -190,8 +201,11 @@ public class RootMotionControlScript : MonoBehaviour
             dive = true;
         }
 
-        anim.SetFloat("velx", inputTurn);
-        anim.SetFloat("vely", inputForward);
+        float inputTurnScale = IsInWater ? inputTurnScaleInWater : 1.0f;
+        float inputForwardScale = IsInWater ? inputForwardScaleInWater : 1.0f;
+
+        anim.SetFloat("velx", inputTurn * inputTurnScale);
+        anim.SetFloat("vely", inputForward * inputForwardScale);
         anim.SetBool("isFalling", !isGrounded);
         anim.SetBool("doButtonPress", doButtonPress);
         anim.SetBool("matchToButtonPress", doMatchToButtonPress);
@@ -202,7 +216,6 @@ public class RootMotionControlScript : MonoBehaviour
 
         //My additions to "add some tweaks to the playback of animations"
         anim.speed = animationSpeed;
-
     }
 
 
@@ -210,7 +223,7 @@ public class RootMotionControlScript : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
 
-        if (collision.transform.gameObject.tag == "ground" || collision.transform.gameObject.tag == "water")
+        if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
         {
 
             ++groundContactCount;
@@ -220,33 +233,33 @@ public class RootMotionControlScript : MonoBehaviour
 
         }
 
-        if(collision.transform.gameObject.tag == "Wall")
+        if (collision.gameObject.CompareTag("Wall"))
         {
             anim.SetBool("isHit", true);
         }
 
-        if (collision.transform.gameObject.tag == "water")
+        if (collision.gameObject.CompareTag("water"))
         {
-            anim.speed = 0.6f;
+            ++waterContactCount;
         }
     }
 
     private void OnCollisionExit(Collision collision)
     {
 
-        if (collision.transform.gameObject.tag == "ground" || collision.transform.gameObject.tag == "water")
+        if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
         {
             --groundContactCount;
         }
 
-        if (collision.transform.gameObject.tag == "Wall")
+        if (collision.gameObject.CompareTag("Wall"))
         {
             anim.SetBool("isHit", false);
         }
 
-        if (collision.transform.gameObject.tag == "water")
+        if (collision.gameObject.CompareTag("water"))
         {
-            anim.speed = 1.1f;
+            --waterContactCount;
         }
     }
 
