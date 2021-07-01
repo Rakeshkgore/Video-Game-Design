@@ -89,6 +89,7 @@ public class RootMotionControlScript : MonoBehaviour
         bool inputAction = false;
         bool doButtonPress = false;
         bool doMatchToButtonPress = false;
+        bool jump = false;
 
 
         if (cinput.enabled)
@@ -167,13 +168,17 @@ public class RootMotionControlScript : MonoBehaviour
             }
         }
 
-
+        if (cinput.Jump)
+        {
+            jump = true;
+        }
 
         anim.SetFloat("velx", inputTurn);
         anim.SetFloat("vely", inputForward);
         anim.SetBool("isFalling", !isGrounded);
         anim.SetBool("doButtonPress", doButtonPress);
         anim.SetBool("matchToButtonPress", doMatchToButtonPress);
+        anim.SetBool("jump", jump);
 
         //My additions to "add some tweaks to the playback of animations"
         anim.speed = animationSpeed;
