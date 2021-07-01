@@ -102,13 +102,14 @@ public class RootMotionControlScript : MonoBehaviour
         bool doButtonPress = false;
         bool doMatchToButtonPress = false;
         bool jump = false;
-
+        bool attack = false;
+        bool dive = false;
 
         if (cinput.enabled)
         {
             inputForward = cinput.Forward;
             inputTurn = cinput.Turn;
-            inputAction = cinput.Action;
+            inputAction = cinput.Bat;
 
         }
 
@@ -134,25 +135,25 @@ public class RootMotionControlScript : MonoBehaviour
         if (inputAction)
         {
             Debug.Log("Action pressed");
+            attack = true;
+            //if (buttonDistance <= buttonCloseEnoughForMatchDistance)
+            //{
+            //    if (buttonDistance <= buttonCloseEnoughForPressDistance &&
+            //        buttonAngleDegrees <= buttonCloseEnoughForPressAngleDegrees)
+            //    {
+            //        Debug.Log("Button press initiated");
 
-            if (buttonDistance <= buttonCloseEnoughForMatchDistance)
-            {
-                if (buttonDistance <= buttonCloseEnoughForPressDistance &&
-                    buttonAngleDegrees <= buttonCloseEnoughForPressAngleDegrees)
-                {
-                    Debug.Log("Button press initiated");
+            //        doButtonPress = true;
 
-                    doButtonPress = true;
+            //    }
+            //    else
+            //    {
+            //        // TODO UNCOMMENT THESE LINES FOR TARGET MATCHING
+            //        Debug.Log("match to button initiated");
+            //        doMatchToButtonPress = true;
+            //    }
 
-                }
-                else
-                {
-                    // TODO UNCOMMENT THESE LINES FOR TARGET MATCHING
-                    Debug.Log("match to button initiated");
-                    doMatchToButtonPress = true;
-                }
-
-            }
+            //}
         }
 
 
@@ -184,6 +185,10 @@ public class RootMotionControlScript : MonoBehaviour
         {
             jump = true;
         }
+        if(cinput.Dive)
+        {
+            dive = true;
+        }
 
         anim.SetFloat("velx", inputTurn);
         anim.SetFloat("vely", inputForward);
@@ -191,6 +196,9 @@ public class RootMotionControlScript : MonoBehaviour
         anim.SetBool("doButtonPress", doButtonPress);
         anim.SetBool("matchToButtonPress", doMatchToButtonPress);
         anim.SetBool("jump", jump);
+        anim.SetBool("attack", attack);
+        anim.SetBool("dive", dive);
+
 
         //My additions to "add some tweaks to the playback of animations"
         anim.speed = animationSpeed;
@@ -202,7 +210,7 @@ public class RootMotionControlScript : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
 
-        if (collision.transform.gameObject.tag == "ground")
+        if (collision.transform.gameObject.tag == "ground" || collision.transform.gameObject.tag == "water")
         {
 
             ++groundContactCount;
@@ -212,16 +220,34 @@ public class RootMotionControlScript : MonoBehaviour
 
         }
 
+        if(collision.transform.gameObject.tag == "Wall")
+        {
+            anim.SetBool("isHit", true);
+        }
+
+        if (collision.transform.gameObject.tag == "water")
+        {
+            anim.speed = 0.6f;
+        }
     }
 
     private void OnCollisionExit(Collision collision)
     {
 
-        if (collision.transform.gameObject.tag == "ground")
+        if (collision.transform.gameObject.tag == "ground" || collision.transform.gameObject.tag == "water")
         {
             --groundContactCount;
         }
 
+        if (collision.transform.gameObject.tag == "Wall")
+        {
+            anim.SetBool("isHit", false);
+        }
+
+        if (collision.transform.gameObject.tag == "water")
+        {
+            anim.speed = 1.1f;
+        }
     }
 
     public GameObject buttonObject;
