@@ -45,7 +45,11 @@ public class CharacterInputController : MonoBehaviour {
         get;
         private set;
     }
-
+    public bool Throw
+    {
+        get;
+        private set;
+    }
 
 
     void Update () {
@@ -109,6 +113,6 @@ public class CharacterInputController : MonoBehaviour {
         Bat = Input.GetButtonDown("Fire1");
         Jump = Input.GetButtonDown("Jump");
         Dive = Input.GetButtonDown("Fire2");
-
+        Throw = Input.GetButtonDown("Fire3");
 	}
 }

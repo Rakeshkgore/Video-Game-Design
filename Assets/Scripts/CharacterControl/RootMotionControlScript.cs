@@ -23,10 +23,10 @@ public class RootMotionControlScript : MonoBehaviour
     private Animator anim;
     private Rigidbody rbody;
     private CharacterInputController cinput;
-
+    private Animator enemyAnim;
     private Transform leftFoot;
     private Transform rightFoot;
-
+    private GetHealth health;
 
     public GameObject buttonPressStandingSpot;
     public float buttonCloseEnoughForMatchDistance = 2f;
@@ -86,6 +86,8 @@ public class RootMotionControlScript : MonoBehaviour
         cinput = GetComponent<CharacterInputController>();
         if (cinput == null)
             Debug.Log("CharacterInput could not be found");
+
+        health = rbody.GetComponent<GetHealth>();
     }
 
 
@@ -115,7 +117,7 @@ public class RootMotionControlScript : MonoBehaviour
         bool jump = false;
         bool attack = false;
         bool dive = false;
-
+        bool throwBall = false;
         if (cinput.enabled)
         {
             inputForward = cinput.Forward;
@@ -200,6 +202,10 @@ public class RootMotionControlScript : MonoBehaviour
         {
             dive = true;
         }
+        if (cinput.Throw)
+        {
+            throwBall = true;
+        }
 
         float inputTurnScale = IsInWater ? inputTurnScaleInWater : 1.0f;
         float inputForwardScale = IsInWater ? inputForwardScaleInWater : 1.0f;
@@ -212,7 +218,7 @@ public class RootMotionControlScript : MonoBehaviour
         anim.SetBool("jump", jump);
         anim.SetBool("attack", attack);
         anim.SetBool("dive", dive);
-
+        anim.SetBool("throw", throwBall);
 
         //My additions to "add some tweaks to the playback of animations"
         anim.speed = animationSpeed;
@@ -222,6 +228,13 @@ public class RootMotionControlScript : MonoBehaviour
     //This is a physics callback
     void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy") && enemyAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsTag("attack"))
+        {
+
+            anim.SetBool("isHit", true);
+            health.LoseHealth();
+
+        }
 
         if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
         {
@@ -246,6 +259,12 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy") && enemyAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsTag("attack"))
+        {
+
+            anim.SetBool("isHit", false);
+
+        }
 
         if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
         {
