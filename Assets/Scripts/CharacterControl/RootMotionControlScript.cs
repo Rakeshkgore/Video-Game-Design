@@ -229,7 +229,7 @@ public class RootMotionControlScript : MonoBehaviour
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy")
             && collision.gameObject.TryGetComponent<VelocityReporter>(out var velocityReporter)
-            && Vector3.Dot(velocityReporter.velocity, -transform.forward) >= 2f)
+            && velocityReporter.velocity.magnitude >= 2f)
         {
             Debug.Log("hit! enemy velocity: " + velocityReporter.velocity + ", towards me: " + Vector3.Dot(velocityReporter.velocity, -transform.forward));
 
