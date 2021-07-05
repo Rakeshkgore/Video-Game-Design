@@ -23,7 +23,6 @@ public class RootMotionControlScript : MonoBehaviour
     private Animator anim;
     private Rigidbody rbody;
     private CharacterInputController cinput;
-    private Animator enemyAnim;
     private Transform leftFoot;
     private Transform rightFoot;
     private GetHealth health;
@@ -228,8 +227,11 @@ public class RootMotionControlScript : MonoBehaviour
     //This is a physics callback
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy") && enemyAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsTag("attack"))
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy")
+            && collision.gameObject.TryGetComponent<VelocityReporter>(out var velocityReporter)
+            && Vector3.Dot(velocityReporter.velocity, -transform.forward) >= 2f)
         {
+            Debug.Log("hit! enemy velocity: " + velocityReporter.velocity + ", towards me: " + Vector3.Dot(velocityReporter.velocity, -transform.forward));
 
             anim.SetBool("isHit", true);
             health.LoseHealth();
@@ -259,7 +261,7 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy") && enemyAnim.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsTag("attack"))
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy"))
         {
 
             anim.SetBool("isHit", false);
