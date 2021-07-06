@@ -6,7 +6,7 @@ using UnityEngine;
 public class RockThrower : MonoBehaviour
 {
     AudioSource audioSource;
-    public AudioClip myAudio;
+    public AudioClip myAudio1;
     public AudioClip myAudio2;
     public AudioClip myAudio3;
     public AudioClip walkAudio;
@@ -48,9 +48,9 @@ public class RockThrower : MonoBehaviour
         currRock = null;
     }
 
-    public void PlayAudio()
+    public void PlayAudio1()
     {
-        audioSource.PlayOneShot(myAudio, 1f);
+        audioSource.PlayOneShot(myAudio1, 1f);
     }
 
     public void PlayAudio2()
