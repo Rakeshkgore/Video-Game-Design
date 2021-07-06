@@ -1,0 +1,25 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class DropApples : MonoBehaviour
+{
+    public Rigidbody[] apples;
+    private int appleNum;
+    // Start is called before the first frame update
+    void Start()
+    {
+        appleNum = apples.Length;
+    }
+    void OnCollisionEnter(Collision c)
+    {
+        if (appleNum > 0 && appleNum <= apples.Length)
+        {
+            if (c.gameObject.layer == LayerMask.NameToLayer("PlayerProjectile"))
+            {
+                apples[appleNum - 1].isKinematic = false;
+                appleNum = appleNum - 1;
+            }
+        }
+    }
+}

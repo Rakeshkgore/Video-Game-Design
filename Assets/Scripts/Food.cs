@@ -13,7 +13,7 @@ public class Food : MonoBehaviour
             {
                 if (gh.hp < 100)
                 {
-                    Destroy(this.gameObject);
+                    Destroy(this.transform.parent.gameObject);
                     gh.ReceiveHealth();
                 }
             }
