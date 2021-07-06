@@ -115,7 +115,7 @@ public class RootMotionControlScript : MonoBehaviour
         bool jump = false;
         bool attack = false;
         bool dive = false;
-
+        
         if (cinput.enabled)
         {
             inputForward = cinput.Forward;
@@ -212,7 +212,7 @@ public class RootMotionControlScript : MonoBehaviour
         anim.SetBool("jump", jump);
         anim.SetBool("attack", attack);
         anim.SetBool("dive", dive);
-
+        anim.SetBool("throwTest", cinput.ThrowBall);
 
         //My additions to "add some tweaks to the playback of animations"
         anim.speed = animationSpeed;
