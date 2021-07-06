@@ -1,26 +1,35 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GetHealth : MonoBehaviour
 {
     public float hp = 100f;
     public void ReceiveHealth()
     {
-        if (hp <= 90)
+        hp += 10f;
+        if (hp > 100f)
         {
-            hp = hp + 10;
-        }
-        else if (hp > 90 && hp <100)
-        {
-            hp = 100;
+            hp = 100f;
         }
     }
 
     public void LoseHealth()
     {
-        Debug.Log(hp);
-        hp = hp - 10;
-        Debug.Log(hp);
+        hp -= 10f;
+        if (hp <= 0f)
+        {
+            hp = 0f;
+            SceneManager.LoadScene("Defeat");
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (WeaponHot.IsCollisionHot(collision))
+        {
+            LoseHealth();
+        }
     }
 }
