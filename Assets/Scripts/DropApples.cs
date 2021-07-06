@@ -15,7 +15,8 @@ public class DropApples : MonoBehaviour
     {
         if (appleNum > 0 && appleNum <= apples.Length)
         {
-            if (c.gameObject.layer == LayerMask.NameToLayer("PlayerProjectile"))
+            if (c.gameObject.TryGetComponent<WeaponHot>(out WeaponHot weapon)
+                && weapon.IsHot)
             {
                 apples[appleNum - 1].isKinematic = false;
                 appleNum = appleNum - 1;
