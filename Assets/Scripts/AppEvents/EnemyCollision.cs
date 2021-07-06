@@ -4,11 +4,16 @@ using UnityEngine;
 
 public class EnemyCollision : MonoBehaviour
 {
+    public AudioSource audioSource;
+
+    void Start() 
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
 
     void OnCollisionEnter(Collision c)
     {
-
-        EventManager.TriggerEvent<BombBounceEvent, Vector3>(c.contacts[0].point);
-
+        Debug.Log("play clip");
+        audioSource.Play();
     }
 }
