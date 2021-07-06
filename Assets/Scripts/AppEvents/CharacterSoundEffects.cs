@@ -8,6 +8,7 @@ public class CharacterSoundEffects : MonoBehaviour
     AudioSource audioSource;
     public AudioClip footstepAudio;
     public AudioClip swipeAudio;
+    public AudioClip myAudio;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,5 +29,10 @@ public class CharacterSoundEffects : MonoBehaviour
     public void PlayWeaponSwipe()
     {
         audioSource.PlayOneShot(swipeAudio, 1f);
+    }
+
+    public void PlayAudio()
+    {
+        audioSource.PlayOneShot(myAudio, 1f);
     }
 }
