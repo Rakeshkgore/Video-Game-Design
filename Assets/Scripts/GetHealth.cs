@@ -16,4 +16,11 @@ public class GetHealth : MonoBehaviour
             hp = 100;
         }
     }
+
+    public void LoseHealth()
+    {
+        Debug.Log(hp);
+        hp = hp - 10;
+        Debug.Log(hp);
+    }
 }
