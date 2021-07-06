@@ -45,7 +45,8 @@ public class CharacterInputController : MonoBehaviour {
         get;
         private set;
     }
-    public bool Throw
+
+    public bool ThrowBall
     {
         get;
         private set;
@@ -113,6 +114,7 @@ public class CharacterInputController : MonoBehaviour {
         Bat = Input.GetButtonDown("Fire1");
         Jump = Input.GetButtonDown("Jump");
         Dive = Input.GetButtonDown("Fire2");
-        Throw = Input.GetButtonDown("Fire3");
+        ThrowBall = Input.GetButtonDown("Fire3");
+
 	}
 }
