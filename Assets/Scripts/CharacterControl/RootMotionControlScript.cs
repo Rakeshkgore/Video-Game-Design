@@ -228,17 +228,6 @@ public class RootMotionControlScript : MonoBehaviour
     //This is a physics callback
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy")
-            && collision.gameObject.TryGetComponent<VelocityReporter>(out var velocityReporter)
-            && velocityReporter.velocity.magnitude >= 2f)
-        {
-            Debug.Log("hit! enemy velocity: " + velocityReporter.velocity + ", towards me: " + Vector3.Dot(velocityReporter.velocity, -transform.forward));
-
-            anim.SetBool("isHit", true);
-            health.LoseHealth();
-
-        }
-
         if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
         {
 
@@ -262,13 +251,6 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy"))
-        {
-
-            anim.SetBool("isHit", false);
-
-        }
-
         if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
         {
             --groundContactCount;
@@ -283,6 +265,17 @@ public class RootMotionControlScript : MonoBehaviour
         {
             --waterContactCount;
         }
+    }
+
+    private void OnWeaponHit(Weapon weapon)
+    {
+        Debug.Log("hit! " + health.hp);
+        anim.SetBool("isHit", true);
+    }
+
+    private void OnWeaponLeave(Weapon weapon)
+    {
+        anim.SetBool("isHit", false);
     }
 
     public GameObject buttonObject;

@@ -6,21 +6,16 @@ public class DropApples : MonoBehaviour
 {
     public Rigidbody[] apples;
     private int appleNum;
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         appleNum = apples.Length;
     }
-    void OnCollisionEnter(Collision c)
+    void OnWeaponHit(Weapon weapon)
     {
         if (appleNum > 0 && appleNum <= apples.Length)
         {
-            if (c.gameObject.TryGetComponent<WeaponHot>(out WeaponHot weapon)
-                && weapon.IsHot)
-            {
-                apples[appleNum - 1].isKinematic = false;
-                appleNum = appleNum - 1;
-            }
+            apples[appleNum - 1].isKinematic = false;
+            appleNum = appleNum - 1;
         }
     }
 }

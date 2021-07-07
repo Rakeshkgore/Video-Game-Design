@@ -5,22 +5,38 @@ using UnityEngine;
 public class GetHealth : MonoBehaviour
 {
     public float hp = 100f;
+    private float maxHp;
+
+    void Awake()
+    {
+        maxHp = hp;
+    }
+
     public void ReceiveHealth()
     {
-        if (hp <= 90)
+        ReceiveHealth(10f);
+    }
+
+    public void ReceiveHealth(float amount)
+    {
+        hp += 10f;
+        if (hp > maxHp)
         {
-            hp = hp + 10;
-        }
-        else if (hp > 90 && hp <100)
-        {
-            hp = 100;
+            hp = maxHp;
         }
     }
 
     public void LoseHealth()
     {
-        Debug.Log(hp);
-        hp = hp - 10;
-        Debug.Log(hp);
+        LoseHealth(10f);
+    }
+
+    public void LoseHealth(float amount)
+    {
+        hp -= amount;
+        if (hp < 0f)
+        {
+            hp = 0f;
+        }
     }
 }
