@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(WeaponHot), typeof(Rigidbody))]
+[RequireComponent(typeof(Weapon), typeof(Rigidbody))]
 public class RockController : MonoBehaviour
 {
-    private WeaponHot weapon;
+    private Weapon weapon;
     private Rigidbody rb;
 
     void Awake()
     {
-        if (!TryGetComponent<WeaponHot>(out weapon))
+        if (!TryGetComponent<Weapon>(out weapon))
         {
             Debug.LogError("A \"Weapon Hot\" script must be attached to this object!");
         }

@@ -228,11 +228,6 @@ public class RootMotionControlScript : MonoBehaviour
     //This is a physics callback
     void OnCollisionEnter(Collision collision)
     {
-        if (WeaponHot.IsCollisionHot(collision))
-        {
-            anim.SetBool("isHit", true);
-        }
-
         if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
         {
 
@@ -256,12 +251,6 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if (WeaponHot.IsCollisionHot(collision, out WeaponHot weapon)
-            || weapon != null)
-        {
-            anim.SetBool("isHit", false);
-        }
-
         if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
         {
             --groundContactCount;
@@ -276,6 +265,17 @@ public class RootMotionControlScript : MonoBehaviour
         {
             --waterContactCount;
         }
+    }
+
+    private void OnWeaponHit(Weapon weapon)
+    {
+        Debug.Log("hit! " + health.hp);
+        anim.SetBool("isHit", true);
+    }
+
+    private void OnWeaponLeave(Weapon weapon)
+    {
+        anim.SetBool("isHit", false);
     }
 
     public GameObject buttonObject;
