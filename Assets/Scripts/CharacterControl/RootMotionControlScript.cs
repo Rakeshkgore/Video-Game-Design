@@ -20,6 +20,7 @@ public class RootMotionControlScript : MonoBehaviour
 
     public GroundCheck[] additionalGroundChecks = {};
     public GolemAI golem;
+    public Lift divination;
 
     private Animator anim;
     private Rigidbody rbody;
@@ -201,7 +202,7 @@ public class RootMotionControlScript : MonoBehaviour
         {
             jump = true;
         }
-        if(cinput.Dive)
+        if(cinput.Dive && !divination.IsMoving)
         {
             dive = true;
         }
@@ -210,8 +211,8 @@ public class RootMotionControlScript : MonoBehaviour
             throwBall = true;
         }
 
-        float inputTurnScale = IsInWater ? inputTurnScaleInWater : 1.0f;
-        float inputForwardScale = IsInWater ? inputForwardScaleInWater : 1.0f;
+        float inputTurnScale = divination.IsMoving ? 0.0f : IsInWater ? inputTurnScaleInWater : 1.0f;
+        float inputForwardScale = divination.IsMoving ? 0.0f : IsInWater ? inputForwardScaleInWater : 1.0f;
 
         anim.SetFloat("velx", inputTurn * inputTurnScale);
         anim.SetFloat("vely", inputForward * inputForwardScale);

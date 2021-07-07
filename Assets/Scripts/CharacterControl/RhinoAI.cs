@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
@@ -173,12 +174,12 @@ public class RhinoAI : MonoBehaviour
 
             AnimatorStateInfo animatorState = ai.animator.GetCurrentAnimatorStateInfo(0);
 
-            if (animatorState.IsTag("hit") && animatorState.normalizedTime >= 1)
+            if (animatorState.IsTag("hit") && animatorState.normalizedTime < 1f)
             {
-                return new IdleState(ai);
+                return this;
             }
 
-            return this;
+            return new IdleState(ai);
         }
     }
 
@@ -285,8 +286,11 @@ public class RhinoAI : MonoBehaviour
 
             if (animatorState.IsTag("eat") && animatorState.normalizedTime >= 1)
             {
-                Destroy(food.gameObject);
-                ai.foods.Remove(food);
+                if (food != null)
+                {
+                    Destroy(food.gameObject);
+                    ai.foods.Remove(food);
+                }
                 return new IdleState(ai);
             }
 

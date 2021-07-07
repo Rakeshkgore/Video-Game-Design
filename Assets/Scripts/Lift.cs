@@ -6,8 +6,17 @@ public class Lift : MonoBehaviour
 {
     public GolemAI golem;
     Animator anim;
-    // Start is called before the first frame update
-    void Start()
+
+    public bool IsMoving
+    {
+        get
+        {
+            AnimatorStateInfo animatorState = anim.GetCurrentAnimatorStateInfo(0);
+            return animatorState.IsTag("lift") && animatorState.normalizedTime < 1f;
+        }
+    }
+
+    void Awake()
     {
         anim = GetComponent<Animator>();
     }
