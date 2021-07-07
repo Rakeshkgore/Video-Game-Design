@@ -16,6 +16,7 @@ public class RhinoAI : MonoBehaviour
     private GetHealth health;
     private List<Food> foods;
     private State state;
+    private float winAt = float.NaN;
 
     void Awake()
     {
@@ -45,6 +46,18 @@ public class RhinoAI : MonoBehaviour
         animator.SetBool("fighting", state is FightState);
         animator.SetBool("eating", state is EatState);
         animator.SetBool("dead", state is DeadState);
+
+        if (state is DeadState)
+        {
+            if (float.IsNaN(winAt))
+            {
+                winAt = Time.time + 2f;
+            }
+            if (Time.time >= winAt)
+            {
+                SceneManager.LoadScene("Victory");
+            }
+        }
     }
 
     bool IsVisible(GameObject gameObject)
