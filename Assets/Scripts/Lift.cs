@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Lift : MonoBehaviour
 {
+    public GolemAI golem;
     Animator anim;
     // Start is called before the first frame update
     void Start()
@@ -16,7 +17,7 @@ public class Lift : MonoBehaviour
         if (c.attachedRigidbody != null)
         {
             GetHealth gh = c.attachedRigidbody.gameObject.GetComponent<GetHealth>();
-            if (gh != null)
+            if (gh != null && golem.IsDead)
             {
                 anim.SetTrigger("Lift");
             }

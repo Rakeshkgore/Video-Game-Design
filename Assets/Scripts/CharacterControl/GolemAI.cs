@@ -9,6 +9,11 @@ public class GolemAI : MonoBehaviour
     private Animator animator;
     private GetHealth health;
 
+    public bool IsDead
+    {
+        get => health.hp <= 0f;
+    }
+
     void Awake()
     {
         animator = GetComponent<Animator>();
@@ -19,7 +24,7 @@ public class GolemAI : MonoBehaviour
     void Update()
     {
         animator.SetBool("throw", true);
-        animator.SetBool("dead", health.hp <= 0f);
+        animator.SetBool("dead", IsDead);
     }
 
     void OnWeaponHit(Weapon weapon)

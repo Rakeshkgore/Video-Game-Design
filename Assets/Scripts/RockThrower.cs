@@ -44,7 +44,7 @@ public class RockThrower : MonoBehaviour
         currRock.isKinematic = false;
         currRock.velocity = Vector3.zero;
         currRock.angularVelocity = Vector3.zero;
-        currRock.AddForce(spawnPosition.rotation * launchVelocity, ForceMode.VelocityChange);
+        currRock.AddForce(transform.rotation * launchVelocity, ForceMode.VelocityChange);
         currRock = null;
     }
 

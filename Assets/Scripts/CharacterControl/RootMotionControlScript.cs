@@ -19,6 +19,7 @@ public class RootMotionControlScript : MonoBehaviour
     public float inputTurnScaleInWater = 0.6f;
 
     public GroundCheck[] additionalGroundChecks = {};
+    public GolemAI golem;
 
     private Animator anim;
     private Rigidbody rbody;
@@ -87,6 +88,8 @@ public class RootMotionControlScript : MonoBehaviour
             Debug.Log("CharacterInput could not be found");
 
         health = rbody.GetComponent<GetHealth>();
+
+        Debug.Assert(golem != null, "Golem must not be null");
     }
 
 
@@ -202,7 +205,7 @@ public class RootMotionControlScript : MonoBehaviour
         {
             dive = true;
         }
-        if (cinput.ThrowBall)
+        if (cinput.ThrowBall && golem.IsDead)
         {
             throwBall = true;
         }
@@ -269,8 +272,8 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void OnWeaponHit(Weapon weapon)
     {
-        Debug.Log("hit! " + health.hp);
         anim.SetBool("isHit", true);
+        health.LoseHealth(weapon.Damage);
     }
 
     private void OnWeaponLeave(Weapon weapon)
