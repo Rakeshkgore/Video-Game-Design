@@ -45,6 +45,8 @@ public class RootMotionControlScript : MonoBehaviour
     private int groundContactCount = 0;
     private int waterContactCount = 0;
 
+    public Canvas canvas;
+
     public bool IsGrounded
     {
         get
@@ -114,7 +116,7 @@ public class RootMotionControlScript : MonoBehaviour
     {
         if (health.hp <= 0f)
         {
-            SceneManager.LoadScene("Defeat");
+            StartCoroutine(FadeScene());
         }
 
         float inputForward = 0f;
@@ -231,6 +233,19 @@ public class RootMotionControlScript : MonoBehaviour
 
         //My additions to "add some tweaks to the playback of animations"
         anim.speed = animationSpeed;
+    }
+
+    IEnumerator FadeScene()
+    {
+        CanvasGroup canvasGroup = canvas.GetComponent<CanvasGroup>();
+        float duration = 0.8f;
+        float counter = 0f;
+        while (counter < duration) {
+            counter += Time.deltaTime;
+            canvasGroup.alpha = Mathf.Lerp(0, 1, counter / duration);
+            yield return null;
+        }
+        SceneManager.LoadScene("Defeat");
     }
 
 
