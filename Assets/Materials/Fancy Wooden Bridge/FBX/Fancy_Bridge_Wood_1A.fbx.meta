@@ -1,0 +1,169 @@
+fileFormatVersion: 2
+guid: a25f49b271be8ee4d94f0c4570c00d52
+timeCreated: 1470848362
+licenseType: Store
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: Arched_Bridge_1A
+    100002: Arched_Bridge_1A2
+    100004: Arched_Bridge_1A2_Small
+    100006: Arched_Bridge_1A_Small
+    100008: Arched_Bridge_1B
+    100010: Arched_Bridge_1B2
+    100012: Arched_Bridge_1B2_Small
+    100014: Arched_Bridge_1B_Small
+    100016: //RootNode
+    100018: Straight_Bridge_1A
+    100020: Straight_Bridge_1A2
+    100022: Straight_Bridge_1A2_Small
+    100024: Straight_Bridge_1A_Small
+    100026: Straight_Bridge_1B
+    100028: Straight_Bridge_1B2
+    100030: Straight_Bridge_1B2_Small
+    100032: Straight_Bridge_1B_Small
+    400000: Arched_Bridge_1A
+    400002: Arched_Bridge_1A2
+    400004: Arched_Bridge_1A2_Small
+    400006: Arched_Bridge_1A_Small
+    400008: Arched_Bridge_1B
+    400010: Arched_Bridge_1B2
+    400012: Arched_Bridge_1B2_Small
+    400014: Arched_Bridge_1B_Small
+    400016: //RootNode
+    400018: Straight_Bridge_1A
+    400020: Straight_Bridge_1A2
+    400022: Straight_Bridge_1A2_Small
+    400024: Straight_Bridge_1A_Small
+    400026: Straight_Bridge_1B
+    400028: Straight_Bridge_1B2
+    400030: Straight_Bridge_1B2_Small
+    400032: Straight_Bridge_1B_Small
+    2300000: Arched_Bridge_1A
+    2300002: Arched_Bridge_1A2
+    2300004: Arched_Bridge_1A2_Small
+    2300006: Arched_Bridge_1A_Small
+    2300008: Arched_Bridge_1B
+    2300010: Arched_Bridge_1B2
+    2300012: Arched_Bridge_1B2_Small
+    2300014: Arched_Bridge_1B_Small
+    2300016: Straight_Bridge_1A
+    2300018: Straight_Bridge_1A2
+    2300020: Straight_Bridge_1A2_Small
+    2300022: Straight_Bridge_1A_Small
+    2300024: Straight_Bridge_1B
+    2300026: Straight_Bridge_1B2
+    2300028: Straight_Bridge_1B2_Small
+    2300030: Straight_Bridge_1B_Small
+    3300000: Arched_Bridge_1A
+    3300002: Arched_Bridge_1A2
+    3300004: Arched_Bridge_1A2_Small
+    3300006: Arched_Bridge_1A_Small
+    3300008: Arched_Bridge_1B
+    3300010: Arched_Bridge_1B2
+    3300012: Arched_Bridge_1B2_Small
+    3300014: Arched_Bridge_1B_Small
+    3300016: Straight_Bridge_1A
+    3300018: Straight_Bridge_1A2
+    3300020: Straight_Bridge_1A2_Small
+    3300022: Straight_Bridge_1A_Small
+    3300024: Straight_Bridge_1B
+    3300026: Straight_Bridge_1B2
+    3300028: Straight_Bridge_1B2_Small
+    3300030: Straight_Bridge_1B_Small
+    4300000: Arched_Bridge_1B
+    4300002: Arched_Bridge_1B_Small
+    4300004: Straight_Bridge_1B
+    4300006: Straight_Bridge_1B2
+    4300008: Straight_Bridge_1B_Small
+    4300010: Straight_Bridge_1B2_Small
+    4300012: Arched_Bridge_1B2_Small
+    4300014: Arched_Bridge_1B2
+    4300016: Arched_Bridge_1A2
+    4300018: Arched_Bridge_1A2_Small
+    4300020: Straight_Bridge_1A2_Small
+    4300022: Straight_Bridge_1A_Small
+    4300024: Straight_Bridge_1A2
+    4300026: Straight_Bridge_1A
+    4300028: Arched_Bridge_1A_Small
+    4300030: Arched_Bridge_1A
+    6400000: Arched_Bridge_1A
+    6400002: Arched_Bridge_1A2
+    6400004: Arched_Bridge_1A2_Small
+    6400006: Arched_Bridge_1A_Small
+    6400008: Arched_Bridge_1B
+    6400010: Arched_Bridge_1B2
+    6400012: Arched_Bridge_1B2_Small
+    6400014: Arched_Bridge_1B_Small
+    6400016: Straight_Bridge_1A
+    6400018: Straight_Bridge_1A2
+    6400020: Straight_Bridge_1A2_Small
+    6400022: Straight_Bridge_1A_Small
+    6400024: Straight_Bridge_1B
+    6400026: Straight_Bridge_1B2
+    6400028: Straight_Bridge_1B2_Small
+    6400030: Straight_Bridge_1B_Small
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 1
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
