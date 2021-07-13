@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class StoneCollisionReporter : MonoBehaviour
+public class BoulderCollisionReporter : MonoBehaviour
 {
     void OnCollisionEnter(Collision c)
     {
