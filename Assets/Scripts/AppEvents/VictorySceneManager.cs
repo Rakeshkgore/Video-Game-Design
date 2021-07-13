@@ -22,12 +22,9 @@ public class VictorySceneManager : MonoBehaviour
 
     IEnumerator FadeScene()
     {
-        Debug.Log("fade called");
         float duration = 3f;
         float counter = 0f;
         while (counter < duration) {
-            Debug.Log("While");
-            Debug.Log(canvasGroup.alpha);
             counter += Time.deltaTime;
             canvasGroup.alpha = Mathf.Lerp(0, 1, counter / duration);
             yield return null;

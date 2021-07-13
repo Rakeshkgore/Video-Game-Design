@@ -63,13 +63,10 @@ public class RhinoAI : MonoBehaviour
 
     IEnumerator FadeScene()
     {
-        Debug.Log("fade called");
         CanvasGroup canvasGroup = canvas.GetComponent<CanvasGroup>();
         float duration = 0.4f;
         float counter = 0f;
         while (counter < duration) {
-            Debug.Log("While");
-            Debug.Log(canvasGroup.alpha);
             counter += Time.deltaTime;
             canvasGroup.alpha = Mathf.Lerp(0, 1, counter / duration);
             yield return null;
