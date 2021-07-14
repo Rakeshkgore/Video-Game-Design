@@ -291,6 +291,21 @@ public class RootMotionControlScript : MonoBehaviour
         }
     }
 
+    void OnTriggerEnter(Collider c)
+    {
+        if (c.gameObject.CompareTag("water"))
+        {
+            this.gameObject.layer = LayerMask.NameToLayer("Submarine");
+        }
+    }
+    private void OnTriggerExit(Collider c)
+    {
+        if (c.gameObject.CompareTag("water"))
+        {
+            this.gameObject.layer = LayerMask.NameToLayer("Player");
+        }
+    }
+
     private void OnWeaponHit(Weapon weapon)
     {
         anim.SetBool("isHit", true);
