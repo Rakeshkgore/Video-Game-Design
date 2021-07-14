@@ -10,13 +10,14 @@ using UnityEngine.SceneManagement;
 public class RhinoAI : MonoBehaviour
 {
     public new Camera camera;
+    public Canvas canvas;
     private NavMeshAgent agent;
     private Animator animator;
     private GameObject player;
     private GetHealth health;
     private List<Food> foods;
     private State state;
-    private float winAt = float.NaN;
+    private bool fadeSceneStarted;
 
     void Awake()
     {
@@ -25,6 +26,7 @@ public class RhinoAI : MonoBehaviour
         health = GetComponent<GetHealth>();
         player = GameObject.FindWithTag("Player");
         foods = new List<Food>(GameObject.FindObjectsOfType<Food>());
+        fadeSceneStarted = false;
     }
 
     void Start()
@@ -47,17 +49,27 @@ public class RhinoAI : MonoBehaviour
         animator.SetBool("eating", state is EatState);
         animator.SetBool("dead", state is DeadState);
 
-        if (state is DeadState)
+        if (state is DeadState && !fadeSceneStarted)
         {
-            if (float.IsNaN(winAt))
-            {
-                winAt = Time.time + 2f;
-            }
-            if (Time.time >= winAt)
-            {
-                SceneManager.LoadScene("Victory");
-            }
+            StartCoroutine(FadeScene());
+            fadeSceneStarted = true;
         }
+    }
+
+    IEnumerator FadeScene()
+    {
+        // Allow rhino death animation to play through
+        yield return new WaitForSeconds(2f);
+
+        CanvasGroup canvasGroup = canvas.GetComponent<CanvasGroup>();
+        float duration = 0.4f;
+        float counter = 0f;
+        while (counter < duration) {
+            counter += Time.deltaTime;
+            canvasGroup.alpha = Mathf.Lerp(0, 1, counter / duration);
+            yield return null;
+        }
+        SceneManager.LoadScene("Victory");
     }
 
     bool IsVisible(GameObject gameObject)

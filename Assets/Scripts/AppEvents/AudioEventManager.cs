@@ -8,23 +8,28 @@ public class AudioEventManager : MonoBehaviour
 
     public EventSound3D eventSound3DPrefab;
 
-    public AudioClip bombBounceAudio;
     public AudioClip[] boxAudio = null;
+    public AudioClip bombBounceAudio;
+
 
     private UnityAction<Vector3,float> boxCollisionEventListener;
+    private UnityAction<Vector3> bombBounceEventListener;
 
     void Awake()
     {
 
         boxCollisionEventListener = new UnityAction<Vector3,float>(boxCollisionEventHandler);
+        bombBounceEventListener = new UnityAction<Vector3>(bombBounceEventHandler);
     }
 
 
     // Use this for initialization
     void Start()
     {
-
-        			
+        EventManager.TriggerEvent<NoParamEvent>();
+        EventManager.TriggerEvent<UnityEvent<int>, int>(5);
+        EventManager.TriggerEvent<OneParamEvent, int>(5);
+        EventManager.TriggerEvent<TwoParamEvent, float, float>(3f, 5f);		
     }
 
 
@@ -32,6 +37,7 @@ public class AudioEventManager : MonoBehaviour
     {
 
         EventManager.StartListening<BoxCollisionEvent, Vector3,float>(boxCollisionEventListener);
+        EventManager.StartListening<BombBounceEvent, Vector3>(bombBounceEventListener);
 
     }
 
@@ -39,6 +45,7 @@ public class AudioEventManager : MonoBehaviour
     {
 
         EventManager.StopListening<BoxCollisionEvent, Vector3,float>(boxCollisionEventListener);
+        EventManager.StopListening<BombBounceEvent, Vector3>(bombBounceEventListener);
     }
  
 

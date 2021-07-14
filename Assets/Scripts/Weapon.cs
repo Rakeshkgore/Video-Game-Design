@@ -61,4 +61,5 @@ public class Weapon : MonoBehaviour
             && collision.rigidbody.TryGetComponent<Weapon>(out weapon)
             && weapon.IsHot);
     }
+
 }
