@@ -14,12 +14,6 @@ public class VictorySceneManager : MonoBehaviour
         StartCoroutine(FadeScene());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     IEnumerator FadeScene()
     {
         float duration = 3f;
