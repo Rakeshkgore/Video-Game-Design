@@ -11,8 +11,9 @@ public class Lift : MonoBehaviour
     {
         get
         {
-            AnimatorStateInfo animatorState = anim.GetCurrentAnimatorStateInfo(0);
-            return animatorState.IsTag("lift") && animatorState.normalizedTime < 1f;
+            // AnimatorStateInfo animatorState = anim.GetCurrentAnimatorStateInfo(0);
+            // return animatorState.IsTag("lift") && animatorState.normalizedTime < 1f;
+            return false;
         }
     }
 
