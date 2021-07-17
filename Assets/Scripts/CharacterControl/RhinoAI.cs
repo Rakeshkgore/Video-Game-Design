@@ -90,6 +90,12 @@ public class RhinoAI : MonoBehaviour
             worldPoint = rb.worldCenterOfMass;
         }
 
+        // FIXME
+        if (gameObject.CompareTag("Player") && gameObject.transform.position.x < -34.33073)
+        {
+            return false;
+        }
+
         RaycastHit hit;
         return (
             !Physics.Linecast(
