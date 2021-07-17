@@ -7,31 +7,41 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(GetHealth))]
+[RequireComponent(typeof(Weapon))]
 public class RhinoAI : MonoBehaviour
 {
     public new Camera camera;
     public Canvas canvas;
+    public float navMeshSampleRadius = 2f;
+    public float facingAngleTolerance = 15f;
+    public float turnInPlaceSpeed = 45f;
+    public float playerSeekWaitTime = 3f;
+    public float minIdleTimeBeforeWander = 5f;
+    public float maxIdleTimeBeforeWander = 10f;
+
     private NavMeshAgent agent;
     private Animator animator;
     private GameObject player;
     private GetHealth health;
+    private Weapon weapon;
     private List<Food> foods;
-    private State state;
-    private bool fadeSceneStarted;
+    private FiniteStateMachine fsm;
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         health = GetComponent<GetHealth>();
+        weapon = GetComponent<Weapon>();
         player = GameObject.FindWithTag("Player");
         foods = new List<Food>(GameObject.FindObjectsOfType<Food>());
-        fadeSceneStarted = false;
     }
 
     void Start()
     {
-        state = new IdleState(this);
+        fsm = new FiniteStateMachine(new IdleState(this));
+        fsm.Enter();
+
         agent.stoppingDistance += Vector3.Distance(
             transform.position,
             Vector3.ProjectOnPlane(
@@ -39,26 +49,18 @@ public class RhinoAI : MonoBehaviour
                 transform.up
             )
         );
+        agent.updatePosition = false;
     }
 
     void Update()
     {
-        state = state.Execute();
-        animator.SetFloat("speed", agent.velocity.magnitude / agent.speed);
-        animator.SetBool("fighting", state is FightState);
-        animator.SetBool("eating", state is EatState);
-        animator.SetBool("dead", state is DeadState);
-
-        if (state is DeadState && !fadeSceneStarted)
-        {
-            StartCoroutine(FadeScene());
-            fadeSceneStarted = true;
-        }
+        fsm.Execute();
     }
 
     void OnAnimatorMove()
     {
         agent.nextPosition = animator.rootPosition;
+        transform.position = agent.nextPosition;
     }
 
     IEnumerator FadeScene()
@@ -77,30 +79,34 @@ public class RhinoAI : MonoBehaviour
         SceneManager.LoadScene("Victory");
     }
 
-    bool IsVisible(GameObject gameObject)
+    void OnWeaponHit(Weapon weapon)
     {
-        if (gameObject == null)
+        if (!(fsm.state is HitState) && !(fsm.state is DeadState))
         {
-            return false;
+            health.LoseHealth(weapon.Damage);
+            if (health.hp <= 0f)
+            {
+                fsm.TransitionTo(new DeadState(this));
+            }
+            else
+            {
+                fsm.TransitionTo(new HitState(this));
+            }
         }
+    }
 
-        Vector3 worldPoint = gameObject.transform.position;
-        if (gameObject.TryGetComponent<Rigidbody>(out Rigidbody rb))
-        {
-            worldPoint = rb.worldCenterOfMass;
-        }
+    bool IsAnimationPlaying(string tag)
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag(tag);
+    }
 
-        // FIXME
-        if (gameObject.CompareTag("Player") && gameObject.transform.position.x < -34.33073)
-        {
-            return false;
-        }
-
+    bool IsVisible(Vector3 target)
+    {
         RaycastHit hit;
         return (
             !Physics.Linecast(
                 camera.transform.position,
-                worldPoint,
+                target,
                 out hit,
                 LayerMask.NameToLayer("Enemy"),
                 QueryTriggerInteraction.Ignore
@@ -109,72 +115,123 @@ public class RhinoAI : MonoBehaviour
         );
     }
 
-    bool IsVisible(MonoBehaviour behaviour)
+    bool NavMeshSamplePosition(Vector3 target, out NavMeshHit hit)
     {
-        if (behaviour == null)
+        return NavMesh.SamplePosition(target, out hit, navMeshSampleRadius + agent.stoppingDistance, GetNavMeshQueryFilter());
+    }
+
+    bool IsValidTarget(GameObject target, out NavMeshPath path)
+    {
+        path = new NavMeshPath();
+        if (target == null)
         {
             return false;
         }
-        return IsVisible(behaviour.gameObject);
-    }
 
-    void OnWeaponHit(Weapon weapon)
-    {
-        if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("hit"))
+        Vector3 targetPosition = GetTargetPosition(target);
+        if (!IsVisible(targetPosition))
         {
-            health.LoseHealth(weapon.Damage);
-            if (health.hp <= 0f)
-            {
-                state = new DeadState(this);
-            }
-            else
-            {
-                animator.SetTrigger("hit");
-                state = new HitState(this);
-            }
+            return false;
         }
+
+        NavMeshHit hit;
+        if (!NavMeshSamplePosition(targetPosition, out hit))
+        {
+            return false;
+        }
+
+        if (!NavMesh.CalculatePath(transform.position, targetPosition, GetNavMeshQueryFilter(), path))
+        {
+            return false;
+        }
+
+        return path.status == NavMeshPathStatus.PathComplete;
     }
 
-    private interface State
+    NavMeshQueryFilter GetNavMeshQueryFilter()
     {
-        State Execute();
+        NavMeshQueryFilter navMeshQueryFilter = new NavMeshQueryFilter();
+        navMeshQueryFilter.agentTypeID = agent.agentTypeID;
+        navMeshQueryFilter.areaMask = NavMesh.AllAreas;
+        return navMeshQueryFilter;
     }
 
-    private class IdleState : State
+    bool IsValidTarget(MonoBehaviour behaviour, out NavMeshPath path)
+    {
+        if (behaviour == null)
+        {
+            path = new NavMeshPath();
+            return false;
+        }
+        return IsValidTarget(behaviour.gameObject, out path);
+    }
+
+    bool IsFacing(Vector3 target, out float angle)
+    {
+        Vector2 forward2 = new Vector2(transform.forward.x, transform.forward.z);
+        Vector3 towards = target - transform.position;
+        Vector2 towards2 = new Vector2(towards.x, towards.z);
+        angle = Vector2.SignedAngle(towards2, forward2);
+        return angle >= -facingAngleTolerance && angle <= facingAngleTolerance;
+    }
+
+    static Vector3 GetTargetPosition(GameObject gameObject)
+    {
+        if (gameObject.TryGetComponent<Rigidbody>(out Rigidbody rb))
+        {
+            return rb.worldCenterOfMass;
+        }
+        return gameObject.transform.position;
+    }
+
+    private class IdleState : FSMState
     {
         private RhinoAI ai;
+        private float wanderAt;
 
         public IdleState(RhinoAI ai)
         {
             this.ai = ai;
         }
 
-        public State Execute()
+        public override void Enter()
+        {
+            wanderAt = Time.time + Random.Range(ai.minIdleTimeBeforeWander, ai.maxIdleTimeBeforeWander);
+        }
+
+        public override FSMState Execute()
         {
             if (ai.health.hp <= 0f)
             {
                 return new DeadState(ai);
             }
 
-            if (ai.IsVisible(ai.player))
+            if (ai.IsValidTarget(ai.player, out _))
             {
-                return new SeekState(ai, ai.player);
+                return new SeekState(ai, ai.player, ai.playerSeekWaitTime, new FightState(ai));
             }
 
-            foreach (Food food in ai.foods)
+            if (ai.health.hp < ai.health.maxHp)
             {
-                if (ai.IsVisible(food))
+                foreach (Food food in ai.foods)
                 {
-                    return new SeekState(ai, food);
+                    if (ai.IsValidTarget(food, out _))
+                    {
+                        return new SeekState(ai, food.gameObject, 0f, new EatState(ai, food));
+                    }
                 }
             }
 
-            ai.agent.isStopped = true;
+            if (Time.time > wanderAt)
+            {
+                return new WanderState(ai);
+            }
+
             return this;
         }
     }
 
-    private class DeadState : State
+    private class DeadState : FSMState
     {
         private RhinoAI ai;
 
@@ -183,14 +240,14 @@ public class RhinoAI : MonoBehaviour
             this.ai = ai;
         }
 
-        public State Execute()
+        public override void Enter()
         {
-            ai.agent.isStopped = true;
-            return this;
+            ai.animator.SetBool("dead", true);
+            ai.StartCoroutine(ai.FadeScene());
         }
     }
 
-    private class HitState : State
+    private class HitState : FSMState
     {
         private RhinoAI ai;
 
@@ -199,87 +256,137 @@ public class RhinoAI : MonoBehaviour
             this.ai = ai;
         }
 
-        public State Execute()
+        public override void Enter()
         {
-            ai.agent.isStopped = true;
-
-            AnimatorStateInfo animatorState = ai.animator.GetCurrentAnimatorStateInfo(0);
-
-            if (animatorState.IsTag("hit") && animatorState.normalizedTime < 1f)
-            {
-                return this;
-            }
-
-            return new IdleState(ai);
-        }
-    }
-
-    private class SeekState : State
-    {
-        private RhinoAI ai;
-        private GameObject target;
-
-        public SeekState(RhinoAI ai, GameObject target)
-        {
-            this.ai = ai;
-            this.target = target;
+            ai.animator.SetBool("hit", true);
         }
 
-        public SeekState(RhinoAI ai, MonoBehaviour target) : this(ai, target.gameObject) {}
-
-        public State Execute()
+        public override FSMState Execute()
         {
-            if (ai.health.hp <= 0f)
+            if (ai.IsAnimationPlaying("hit"))
             {
-                return new DeadState(ai);
+                ai.animator.SetBool("hit", false);
             }
-
-            if (!ai.IsVisible(target))
+            else if (!ai.animator.GetBool("hit"))
             {
-                return new IdleState(ai);
+                return new WanderState(ai);
             }
-
-            ai.agent.SetDestination(target.transform.position);
-            ai.agent.isStopped = false;
-
-            if (!ai.agent.pathPending
-                && ai.agent.remainingDistance <= ai.agent.stoppingDistance
-                && ai.agent.velocity.sqrMagnitude == 0f
-                && ai.agent.pathStatus == NavMeshPathStatus.PathComplete)
-            {
-                Vector2 forward2 = new Vector2(ai.transform.forward.x, ai.transform.forward.z);
-                Vector3 towards = target.transform.position - ai.transform.position;
-                Vector2 towards2 = new Vector2(towards.x, towards.z);
-                float angle = Vector2.SignedAngle(towards2, forward2);
-
-                if (Mathf.Abs(angle) > 15f)
-                {
-                    ai.animator.SetFloat("turn", Mathf.Sign(angle));
-                    ai.transform.Rotate(Vector3.up, Mathf.Clamp(angle, -45f * Time.deltaTime, 45f * Time.deltaTime));
-                }
-                else
-                {
-                    ai.animator.SetFloat("turn", 0f);
-                    if (target.CompareTag("Player"))
-                    {
-                        return new FightState(ai);
-                    }
-
-                    Food food;
-                    if (target.TryGetComponent<Food>(out food))
-                    {
-                        return new EatState(ai, food);
-                    }
-
-                    return new IdleState(ai);
-                }
-            }
-
             return this;
         }
     }
 
-    private class FightState : State
+    private class SeekState : FSMState
+    {
+        private RhinoAI ai;
+        private GameObject target;
+        private float maxWaitTime;
+        private FSMState nextState;
+        private float waitingSince;
+
+        public SeekState(RhinoAI ai, GameObject target, float maxWaitTime, FSMState nextState)
+        {
+            this.ai = ai;
+            this.target = target;
+            this.maxWaitTime = maxWaitTime;
+            this.nextState = nextState;
+            waitingSince = Time.time;
+        }
+
+        public override FSMState Execute()
+        {
+            if (!ai.IsValidTarget(target, out NavMeshPath path)
+                || !ai.agent.SetPath(path))
+            {
+                if (Time.time - waitingSince >= maxWaitTime)
+                {
+                    return new IdleState(ai);
+                }
+
+                return this;
+            }
+            else
+            {
+                waitingSince = Time.time;
+            }
+
+            if (ai.agent.remainingDistance > ai.agent.stoppingDistance)
+            {
+                float speed = ai.agent.velocity.magnitude;
+                ai.animator.SetFloat("speed", speed / ai.agent.speed);
+                ai.animator.SetFloat("turn", 0f);
+
+                return this;
+            }
+
+            if (!ai.IsFacing(GetTargetPosition(target), out float angle))
+            {
+                float maxTurn = ai.turnInPlaceSpeed * Time.deltaTime;
+                ai.transform.Rotate(Vector3.up, Mathf.Clamp(angle, -maxTurn, maxTurn));
+
+                ai.animator.SetFloat("speed", 0f);
+                ai.animator.SetFloat("turn", Mathf.Sign(angle));
+
+                return this;
+            }
+
+            return nextState;
+        }
+
+        public override void Exit()
+        {
+            ai.animator.SetFloat("speed", 0f);
+            ai.animator.SetFloat("turn", 0f);
+        }
+    }
+
+    private class WanderState : FSMState
+    {
+        private const int numAttempts = 30;
+        private const float range = 20f;
+        private RhinoAI ai;
+
+        public WanderState(RhinoAI ai)
+        {
+            this.ai = ai;
+        }
+
+        public override void Enter()
+        {
+            for (int i = 0; i < numAttempts; i++)
+            {
+                Vector2 offset2 = Random.insideUnitCircle * range;
+                Vector3 offset = new Vector3(offset2.x, 0f, offset2.y);
+                Vector3 target = ai.transform.position + offset;
+                if (NavMesh.SamplePosition(target, out NavMeshHit hit, 2f * ai.agent.height, ai.GetNavMeshQueryFilter())
+                    && ai.agent.SetDestination(target))
+                {
+                    return;
+                }
+            }
+
+            ai.agent.SetDestination(ai.transform.position);
+        }
+
+        public override FSMState Execute()
+        {
+            if (ai.agent.remainingDistance > ai.agent.stoppingDistance)
+            {
+                float speed = ai.agent.velocity.magnitude;
+                ai.animator.SetFloat("speed", speed / ai.agent.speed);
+
+                return this;
+            }
+            
+            return new IdleState(ai);
+        }
+
+        public override void Exit()
+        {
+            ai.animator.SetFloat("speed", 0f);
+        }
+    }
+
+    private class FightState : FSMState
     {
         private RhinoAI ai;
 
@@ -288,47 +395,35 @@ public class RhinoAI : MonoBehaviour
             this.ai = ai;
         }
 
-        public State Execute()
+        public override void Enter()
         {
-            if (ai.health.hp <= 0f)
+            ai.animator.SetBool("fighting", true);
+        }
+
+        public override FSMState Execute()
+        {
+            if (!ai.IsValidTarget(ai.player, out NavMeshPath path)
+                || !ai.agent.SetPath(path)
+                || ai.agent.remainingDistance > ai.agent.stoppingDistance
+                || !ai.IsFacing(GetTargetPosition(ai.player), out _))
             {
-                return new DeadState(ai);
-            }
-
-            if (!ai.IsVisible(ai.player))
-            {
-                return new IdleState(ai);
-            }
-
-            ai.agent.SetDestination(ai.player.transform.position);
-            ai.agent.isStopped = true;
-
-            if (!ai.agent.pathPending && (
-                    ai.agent.remainingDistance > ai.agent.stoppingDistance
-                    || ai.agent.pathStatus != NavMeshPathStatus.PathComplete
-                ))
-            {
-                return new SeekState(ai, ai.player);
-            }
-
-            Vector2 forward2 = new Vector2(ai.transform.forward.x, ai.transform.forward.z);
-            Vector3 towards = ai.player.transform.position - ai.transform.position;
-            Vector2 towards2 = new Vector2(towards.x, towards.z);
-            float angle = Vector2.SignedAngle(towards2, forward2);
-
-            if (Mathf.Abs(angle) > 15f)
-            {
-                return new SeekState(ai, ai.player);
+                return new SeekState(ai, ai.player, ai.playerSeekWaitTime, this);
             }
 
             return this;
         }
+
+        public override void Exit()
+        {
+            ai.animator.SetBool("fighting", false);
+            ai.weapon.SetCold();
+        }
     }
 
-    private class EatState : State
+    private class EatState : FSMState
     {
         private RhinoAI ai;
-        private Food food;
+        public Food food { get; private set; }
 
         public EatState(RhinoAI ai, Food food)
         {
@@ -336,25 +431,26 @@ public class RhinoAI : MonoBehaviour
             this.food = food;
         }
 
-        public State Execute()
+        public override void Enter()
         {
-            if (ai.health.hp <= 0f)
+            ai.animator.SetBool("eat", true);
+        }
+
+        public override FSMState Execute()
+        {
+            if (ai.IsAnimationPlaying("eat"))
             {
-                return new DeadState(ai);
+                ai.animator.SetBool("eat", false);
             }
-
-            AnimatorStateInfo animatorState = ai.animator.GetCurrentAnimatorStateInfo(0);
-
-            if (animatorState.IsTag("eat") && animatorState.normalizedTime >= 1)
+            else if (!ai.animator.GetBool("eat"))
             {
                 if (food != null)
                 {
                     Destroy(food.gameObject);
-                    ai.foods.Remove(food);
+                    ai.health.ReceiveHealth();
                 }
                 return new IdleState(ai);
             }
-
             return this;
         }
     }
