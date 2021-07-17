@@ -56,6 +56,11 @@ public class RhinoAI : MonoBehaviour
         }
     }
 
+    void OnAnimatorMove()
+    {
+        agent.nextPosition = animator.rootPosition;
+    }
+
     IEnumerator FadeScene()
     {
         // Allow rhino death animation to play through
@@ -80,26 +85,21 @@ public class RhinoAI : MonoBehaviour
         }
 
         Vector3 worldPoint = gameObject.transform.position;
-        Vector3 viewportPoint = camera.WorldToViewportPoint(worldPoint);
-        RaycastHit hit;
+        if (gameObject.TryGetComponent<Rigidbody>(out Rigidbody rb))
+        {
+            worldPoint = rb.worldCenterOfMass;
+        }
 
+        RaycastHit hit;
         return (
-            viewportPoint.x >= 0 &&
-            viewportPoint.x <= 1 &&
-            viewportPoint.y >= 0 &&
-            viewportPoint.y <= 1 &&
-            viewportPoint.z >= camera.nearClipPlane &&
-            viewportPoint.z <= camera.farClipPlane &&
-            (
-                !Physics.Linecast(
-                    transform.position,
-                    worldPoint,
-                    out hit,
-                    Physics.AllLayers,
-                    QueryTriggerInteraction.Ignore
-                ) ||
-                hit.collider.gameObject.Equals(gameObject)
-            )
+            !Physics.Linecast(
+                camera.transform.position,
+                worldPoint,
+                out hit,
+                LayerMask.NameToLayer("Enemy"),
+                QueryTriggerInteraction.Ignore
+            ) ||
+            hit.collider.gameObject.Equals(gameObject)
         );
     }
 
