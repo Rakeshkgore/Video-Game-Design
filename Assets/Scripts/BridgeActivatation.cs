@@ -23,6 +23,7 @@ public class BridgeActivatation : MonoBehaviour
         {
             animTutorialWall.SetTrigger("Descend");
             animMainWall.SetTrigger("Descend");
+            gameObject.SetActive(false);
         }
     }
 }

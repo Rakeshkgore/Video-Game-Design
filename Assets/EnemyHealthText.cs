@@ -18,6 +18,7 @@ public class EnemyHealthText : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        healthText.text = "Enemy Health: " + (player.position.y < -1 ? golemHealth.hp : rhinoHealth.hp);
+        // FIXME
+        healthText.text = "Enemy Health: " + (player.position.x < -34.33073 ? golemHealth.hp : rhinoHealth.hp);
     }
 }

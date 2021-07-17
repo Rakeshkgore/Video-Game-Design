@@ -6,6 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(GetHealth))]
 public class GolemAI : MonoBehaviour
 {
+    public new GameObject particleSystem;
     private Animator animator;
     private GetHealth health;
 
@@ -18,6 +19,7 @@ public class GolemAI : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         health = GetComponent<GetHealth>();
+        Debug.Assert(particleSystem != null, "Particle System must not be null");
     }
 
     // Update is called once per frame
@@ -25,6 +27,7 @@ public class GolemAI : MonoBehaviour
     {
         animator.SetBool("throw", true);
         animator.SetBool("dead", IsDead);
+        particleSystem.SetActive(IsDead);
     }
 
     void OnWeaponHit(Weapon weapon)
