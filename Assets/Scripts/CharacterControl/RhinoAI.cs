@@ -242,20 +242,37 @@ public class RhinoAI : MonoBehaviour
             ai.agent.SetDestination(target.transform.position);
             ai.agent.isStopped = false;
 
-            if (!ai.agent.pathPending && ai.agent.remainingDistance <= ai.agent.stoppingDistance)
+            if (!ai.agent.pathPending
+                && ai.agent.remainingDistance <= ai.agent.stoppingDistance
+                && ai.agent.velocity.sqrMagnitude == 0f
+                && ai.agent.pathStatus == NavMeshPathStatus.PathComplete)
             {
-                if (target.CompareTag("Player"))
-                {
-                    return new FightState(ai);
-                }
+                Vector2 forward2 = new Vector2(ai.transform.forward.x, ai.transform.forward.z);
+                Vector3 towards = target.transform.position - ai.transform.position;
+                Vector2 towards2 = new Vector2(towards.x, towards.z);
+                float angle = Vector2.SignedAngle(towards2, forward2);
 
-                Food food;
-                if (target.TryGetComponent<Food>(out food))
+                if (Mathf.Abs(angle) > 15f)
                 {
-                    return new EatState(ai, food);
+                    ai.animator.SetFloat("turn", Mathf.Sign(angle));
+                    ai.transform.Rotate(Vector3.up, Mathf.Clamp(angle, -45f * Time.deltaTime, 45f * Time.deltaTime));
                 }
+                else
+                {
+                    ai.animator.SetFloat("turn", 0f);
+                    if (target.CompareTag("Player"))
+                    {
+                        return new FightState(ai);
+                    }
 
-                return new IdleState(ai);
+                    Food food;
+                    if (target.TryGetComponent<Food>(out food))
+                    {
+                        return new EatState(ai, food);
+                    }
+
+                    return new IdleState(ai);
+                }
             }
 
             return this;
@@ -286,7 +303,20 @@ public class RhinoAI : MonoBehaviour
             ai.agent.SetDestination(ai.player.transform.position);
             ai.agent.isStopped = true;
 
-            if (!ai.agent.pathPending && ai.agent.remainingDistance > ai.agent.stoppingDistance)
+            if (!ai.agent.pathPending && (
+                    ai.agent.remainingDistance > ai.agent.stoppingDistance
+                    || ai.agent.pathStatus != NavMeshPathStatus.PathComplete
+                ))
+            {
+                return new SeekState(ai, ai.player);
+            }
+
+            Vector2 forward2 = new Vector2(ai.transform.forward.x, ai.transform.forward.z);
+            Vector3 towards = ai.player.transform.position - ai.transform.position;
+            Vector2 towards2 = new Vector2(towards.x, towards.z);
+            float angle = Vector2.SignedAngle(towards2, forward2);
+
+            if (Mathf.Abs(angle) > 15f)
             {
                 return new SeekState(ai, ai.player);
             }
