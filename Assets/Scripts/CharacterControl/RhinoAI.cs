@@ -14,7 +14,8 @@ public class RhinoAI : MonoBehaviour
     public new Camera camera;
     public Canvas canvas;
     public float navMeshSampleRadius = 2f;
-    public float facingAngleTolerance = 15f;
+    public float minTargetRadius = 2.333f;
+    public float facingAngleTolerance = 10f;
     public float turnInPlaceSpeed = 45f;
     public float playerSeekWaitTime = 3f;
     public float minIdleTimeBeforeWander = 5f;
@@ -278,7 +279,7 @@ public class RhinoAI : MonoBehaviour
             }
             else if (!animationQueued)
             {
-                return new WanderState(ai);
+                return new IdleState(ai);
             }
             return this;
         }
@@ -327,6 +328,14 @@ public class RhinoAI : MonoBehaviour
             {
                 float speed = ai.agent.velocity.magnitude;
                 ai.animator.SetFloat("speed", speed / ai.agent.speed);
+                ai.animator.SetFloat("turn", 0f);
+
+                return this;
+            }
+
+            if (ai.agent.remainingDistance < ai.minTargetRadius)
+            {
+                ai.animator.SetFloat("speed", -0.28f);
                 ai.animator.SetFloat("turn", 0f);
 
                 return this;
