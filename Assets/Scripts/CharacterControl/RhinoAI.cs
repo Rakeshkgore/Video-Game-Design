@@ -89,7 +89,6 @@ public class RhinoAI : MonoBehaviour
         if (health.hp > 0f && !invincibility.IsInvincible())
         {
             health.LoseHealth(weapon.Damage);
-            invincibility.SetInvincibleFor(invincibilityDuration);
 
             if (health.hp <= 0f)
             {
@@ -98,6 +97,7 @@ public class RhinoAI : MonoBehaviour
             else
             {
                 fsm.TransitionTo(new HitState(this));
+                invincibility.SetInvincibleFor(invincibilityDuration);
             }
         }
     }
