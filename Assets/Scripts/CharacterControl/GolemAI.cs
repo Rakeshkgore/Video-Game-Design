@@ -4,11 +4,14 @@ using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(GetHealth))]
+[RequireComponent(typeof(Invincibility))]
 public class GolemAI : MonoBehaviour
 {
+    public float invincibilityDuration = 1f;
     public new GameObject particleSystem;
     private Animator animator;
     private GetHealth health;
+    private Invincibility invincibility;
 
     public bool IsDead
     {
@@ -19,6 +22,7 @@ public class GolemAI : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         health = GetComponent<GetHealth>();
+        invincibility = GetComponent<Invincibility>();
         Debug.Assert(particleSystem != null, "Particle System must not be null");
     }
 
@@ -32,10 +36,15 @@ public class GolemAI : MonoBehaviour
 
     void OnWeaponHit(Weapon weapon)
     {
-        if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("hit"))
+        if (!invincibility.IsInvincible())
         {
             health.LoseHealth(weapon.Damage);
             animator.SetTrigger("hit");
+
+            if (health.hp > 0f)
+            {
+                invincibility.SetInvincibleFor(80f / 60f);
+            }
         }
     }
 }

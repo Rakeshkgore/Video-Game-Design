@@ -10,6 +10,7 @@ using UnityEditor;
 //require some things the bot control needs
 [RequireComponent(typeof(Animator), typeof(Rigidbody), typeof(CapsuleCollider))]
 [RequireComponent(typeof(CharacterInputController))]
+[RequireComponent(typeof(Invincibility))]
 public class RootMotionControlScript : MonoBehaviour
 {
     //My additions to "add some tweaks to the playback of animations"
@@ -18,6 +19,7 @@ public class RootMotionControlScript : MonoBehaviour
     public float rootTurnSpeed = 1f;
     public float inputForwardScaleInWater = 0.6f;
     public float inputTurnScaleInWater = 0.6f;
+    public float invincibilityDuration = 2f;
 
     public GroundCheck[] additionalGroundChecks = {};
     public GolemAI golem;
@@ -29,6 +31,7 @@ public class RootMotionControlScript : MonoBehaviour
     private Transform leftFoot;
     private Transform rightFoot;
     private GetHealth health;
+    private Invincibility invincibility;
 
     public GameObject buttonPressStandingSpot;
     public float buttonCloseEnoughForMatchDistance = 2f;
@@ -92,6 +95,7 @@ public class RootMotionControlScript : MonoBehaviour
             Debug.Log("CharacterInput could not be found");
 
         health = rbody.GetComponent<GetHealth>();
+        invincibility = GetComponent<Invincibility>();
 
         Debug.Assert(golem != null, "Golem must not be null");
     }
@@ -308,8 +312,16 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void OnWeaponHit(Weapon weapon)
     {
-        anim.SetBool("isHit", true);
-        health.LoseHealth(weapon.Damage);
+        if (!invincibility.IsInvincible())
+        {
+            anim.SetBool("isHit", true);
+            health.LoseHealth(weapon.Damage);
+
+            if (health.hp > 0f)
+            {
+                invincibility.SetInvincibleFor(invincibilityDuration);
+            }
+        }
     }
 
     private void OnWeaponLeave(Weapon weapon)
