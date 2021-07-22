@@ -103,11 +103,6 @@ public class RhinoAI : MonoBehaviour
         }
     }
 
-    bool IsAnimationPlaying(string tag)
-    {
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag(tag);
-    }
-
     bool IsVisible(Vector3 target)
     {
         RaycastHit hit;
@@ -181,6 +176,11 @@ public class RhinoAI : MonoBehaviour
         Vector2 towards2 = new Vector2(towards.x, towards.z);
         angle = Vector2.SignedAngle(towards2, forward2);
         return angle >= -facingAngleTolerance && angle <= facingAngleTolerance;
+    }
+
+    public bool IsAnimationPlaying(string tag)
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag(tag);
     }
 
     static Vector3 GetTargetPosition(GameObject gameObject)
