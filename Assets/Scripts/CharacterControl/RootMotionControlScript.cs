@@ -44,6 +44,7 @@ public class RootMotionControlScript : MonoBehaviour
 
     private int groundContactCount = 0;
     private int waterContactCount = 0;
+    private int wallContactCount = 0;
 
     public Canvas canvas;
 
@@ -71,6 +72,14 @@ public class RootMotionControlScript : MonoBehaviour
         get
         {
             return waterContactCount > 0;
+        }
+    }
+
+    public bool IsHitWall
+    {
+        get
+        {
+            return wallContactCount > 0;
         }
     }
 
@@ -257,14 +266,14 @@ public class RootMotionControlScript : MonoBehaviour
 
         }
 
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            anim.SetBool("isHit", true);
-        }
-
         if (collision.gameObject.CompareTag("water"))
         {
             ++waterContactCount;
+        }
+
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            ++wallContactCount;
         }
     }
 
@@ -275,14 +284,13 @@ public class RootMotionControlScript : MonoBehaviour
             --groundContactCount;
         }
 
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            anim.SetBool("isHit", false);
-        }
-
         if (collision.gameObject.CompareTag("water"))
         {
             --waterContactCount;
+        }
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            --wallContactCount;
         }
     }
 
