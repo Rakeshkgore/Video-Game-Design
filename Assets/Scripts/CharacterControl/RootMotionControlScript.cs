@@ -247,7 +247,7 @@ public class RootMotionControlScript : MonoBehaviour
     //This is a physics callback
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
+        if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water") || collision.gameObject.CompareTag("Wall"))
         {
 
             ++groundContactCount;
@@ -257,10 +257,10 @@ public class RootMotionControlScript : MonoBehaviour
 
         }
 
-        if (collision.gameObject.CompareTag("Wall"))
+        /*if (collision.gameObject.CompareTag("Wall"))
         {
             anim.SetBool("isHit", true);
-        }
+        }*/
 
         if (collision.gameObject.CompareTag("water"))
         {
@@ -270,15 +270,15 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
+        if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water")|| collision.gameObject.CompareTag("Wall"))
         {
             --groundContactCount;
         }
 
-        if (collision.gameObject.CompareTag("Wall"))
+        /*if (collision.gameObject.CompareTag("Wall"))
         {
             anim.SetBool("isHit", false);
-        }
+        }*/
 
         if (collision.gameObject.CompareTag("water"))
         {
