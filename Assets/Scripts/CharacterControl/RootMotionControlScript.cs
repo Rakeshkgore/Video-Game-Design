@@ -279,7 +279,7 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water")|| collision.gameObject.CompareTag("Wall"))
+        if (collision.gameObject.CompareTag("ground") || collision.gameObject.CompareTag("water"))
         {
             --groundContactCount;
         }
