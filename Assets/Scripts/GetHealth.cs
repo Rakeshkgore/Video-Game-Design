@@ -6,23 +6,35 @@ public class GetHealth : MonoBehaviour
 {
     public float hp = 100f;
     public float maxHp { get; private set; }
+    public float mhp;
+    public float defaultAdd;
 
     void Awake()
     {
         maxHp = hp;
+        mhp = maxHp;
+        defaultAdd = 10f;
+    }
+
+    void Update()
+    {
+        if (hp > mhp)
+        {
+            hp = mhp;
+        }
     }
 
     public void ReceiveHealth()
     {
-        ReceiveHealth(10f);
+        ReceiveHealth(defaultAdd);
     }
 
     public void ReceiveHealth(float amount)
     {
-        hp += 10f;
-        if (hp > maxHp)
+        hp += defaultAdd;
+        if (hp > mhp)
         {
-            hp = maxHp;
+            hp = mhp;
         }
     }
 

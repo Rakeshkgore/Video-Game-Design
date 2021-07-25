@@ -47,6 +47,7 @@ public class RootMotionControlScript : MonoBehaviour
 
     private int groundContactCount = 0;
     private int waterContactCount = 0;
+    private int wallContactCount = 0;
 
     public Canvas canvas;
 
@@ -77,6 +78,14 @@ public class RootMotionControlScript : MonoBehaviour
         }
     }
 
+    public bool IsHitWall
+    {
+        get
+        {
+            return wallContactCount > 0;
+        }
+    }
+
     void Awake()
     {
 
@@ -100,7 +109,6 @@ public class RootMotionControlScript : MonoBehaviour
         Debug.Assert(golem != null, "Golem must not be null");
     }
 
-
     // Use this for initialization
     void Start()
     {
@@ -112,9 +120,6 @@ public class RootMotionControlScript : MonoBehaviour
             Debug.Log("One of the feet could not be found");
 
     }
-
-
-
 
     void Update()
     {
@@ -147,8 +152,6 @@ public class RootMotionControlScript : MonoBehaviour
         //This is good for allowing player to jump and not be frustrated that the jump button doesn't
         //work
         bool isGrounded = IsGrounded || CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
-
-
 
         float buttonDistance = float.MaxValue;
         float buttonAngleDegrees = float.MaxValue;
@@ -222,8 +225,9 @@ public class RootMotionControlScript : MonoBehaviour
             throwBall = true;
         }
 
-        float inputTurnScale = divination.IsMoving ? 0.0f : IsInWater ? inputTurnScaleInWater : 1.0f;
-        float inputForwardScale = divination.IsMoving ? 0.0f : IsInWater ? inputForwardScaleInWater : 1.0f;
+        GetBlessed gb = GetComponent<GetBlessed>();
+        float inputTurnScale = divination.IsMoving ? 0.0f : (IsInWater && !gb.PoseidonPassed) ? inputTurnScaleInWater : 1.0f;
+        float inputForwardScale = divination.IsMoving ? 0.0f : (IsInWater && !gb.PoseidonPassed) ? inputForwardScaleInWater : 1.0f;
 
         anim.SetFloat("velx", inputTurn * inputTurnScale);
         anim.SetFloat("vely", inputForward * inputForwardScale);
@@ -266,14 +270,14 @@ public class RootMotionControlScript : MonoBehaviour
 
         }
 
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            anim.SetBool("isHit", true);
-        }
-
         if (collision.gameObject.CompareTag("water"))
         {
             ++waterContactCount;
+        }
+
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            ++wallContactCount;
         }
     }
 
@@ -284,14 +288,13 @@ public class RootMotionControlScript : MonoBehaviour
             --groundContactCount;
         }
 
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            anim.SetBool("isHit", false);
-        }
-
         if (collision.gameObject.CompareTag("water"))
         {
             --waterContactCount;
+        }
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            --wallContactCount;
         }
     }
 
@@ -357,7 +360,6 @@ public class RootMotionControlScript : MonoBehaviour
 
     void OnAnimatorMove()
     {
-
         Vector3 newRootPosition;
         Quaternion newRootRotation;
 
@@ -373,13 +375,7 @@ public class RootMotionControlScript : MonoBehaviour
         newRootPosition = Vector3.LerpUnclamped(this.transform.position, newRootPosition, rootMovementSpeed);
         newRootRotation = Quaternion.LerpUnclamped(this.transform.rotation, newRootRotation, rootTurnSpeed);
 
-
         this.transform.position = newRootPosition;
         this.transform.rotation = newRootRotation;
-
     }
-
-
-
-
 }
