@@ -77,7 +77,13 @@ public class SoundParticleController : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        other.SendMessage("OnSoundParticleHit", SendMessageOptions.DontRequireReceiver);
-        Destroy(gameObject);
+        if (!other.CompareTag("ground"))
+        {
+            if (other.attachedRigidbody != null)
+            {
+                other.attachedRigidbody.SendMessage("OnSoundParticleHit", SendMessageOptions.DontRequireReceiver);
+            }
+            Destroy(gameObject);
+        }
     }
 }

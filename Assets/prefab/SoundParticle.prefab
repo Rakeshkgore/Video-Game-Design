@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3430946466626101429}
   - component: {fileID: 3430946466626101430}
   - component: {fileID: 3430946466626101435}
-  m_Layer: 12
+  m_Layer: 18
   m_Name: SoundParticle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
