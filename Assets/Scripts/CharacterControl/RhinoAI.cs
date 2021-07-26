@@ -12,6 +12,7 @@ using UnityEngine.SceneManagement;
 public class RhinoAI : MonoBehaviour
 {
     public new Camera camera;
+    public TriggerCount meleeHitZone;
     public Canvas canvas;
     public float navMeshSampleRadius = 2f;
     public float minTargetRadius = 2.333f;
