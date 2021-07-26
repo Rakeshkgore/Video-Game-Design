@@ -341,6 +341,11 @@ public class RootMotionControlScript : MonoBehaviour
         TryTakeDamage(5f);
     }
 
+    private void OnFireHit()
+    {
+        TryTakeDamage(15f);
+    }
+
     public GameObject buttonObject;
     private void OnAnimatorIK(int layerIndex)
     {
