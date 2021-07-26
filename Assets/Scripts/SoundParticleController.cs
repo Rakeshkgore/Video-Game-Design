@@ -75,8 +75,9 @@ public class SoundParticleController : MonoBehaviour
         transform.position += Time.deltaTime * velocity;
     }
 
-    void OnTriggerEnter()
+    void OnTriggerEnter(Collider other)
     {
+        other.SendMessage("OnSoundParticleHit", SendMessageOptions.DontRequireReceiver);
         Destroy(gameObject);
     }
 }

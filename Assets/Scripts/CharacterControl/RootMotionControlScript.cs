@@ -313,23 +313,32 @@ public class RootMotionControlScript : MonoBehaviour
         }
     }
 
-    private void OnWeaponHit(Weapon weapon)
+    private bool TryTakeDamage(float damage)
     {
-        if (!invincibility.IsInvincible())
+        if (invincibility.IsInvincible())
         {
-            anim.SetBool("isHit", true);
-            health.LoseHealth(weapon.Damage);
-
-            if (health.hp > 0f)
-            {
-                invincibility.SetInvincibleFor(invincibilityDuration);
-            }
+            return false;
         }
+
+        anim.SetTrigger("isHit");
+        health.LoseHealth(damage);
+
+        if (health.hp > 0f)
+        {
+            invincibility.SetInvincibleFor(invincibilityDuration);
+        }
+
+        return true;
     }
 
-    private void OnWeaponLeave(Weapon weapon)
+    private void OnWeaponHit(Weapon weapon)
     {
-        anim.SetBool("isHit", false);
+        TryTakeDamage(weapon.Damage);
+    }
+
+    private void OnSoundParticleHit()
+    {
+        TryTakeDamage(5f);
     }
 
     public GameObject buttonObject;
