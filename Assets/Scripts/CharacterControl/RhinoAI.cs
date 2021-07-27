@@ -8,22 +8,27 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(GetHealth))]
 [RequireComponent(typeof(Weapon))]
+[RequireComponent(typeof(Invincibility))]
 public class RhinoAI : MonoBehaviour
 {
     public new Camera camera;
+    public TriggerCount meleeHitZone;
     public Canvas canvas;
     public float navMeshSampleRadius = 2f;
-    public float facingAngleTolerance = 15f;
+    public float minTargetRadius = 2.333f;
+    public float facingAngleTolerance = 10f;
     public float turnInPlaceSpeed = 45f;
     public float playerSeekWaitTime = 3f;
     public float minIdleTimeBeforeWander = 5f;
     public float maxIdleTimeBeforeWander = 10f;
+    public float invincibilityDuration = 3f;
 
     private NavMeshAgent agent;
     private Animator animator;
     private GameObject player;
     private GetHealth health;
     private Weapon weapon;
+    private Invincibility invincibility;
     private List<Food> foods;
     private FiniteStateMachine fsm;
 
@@ -33,6 +38,7 @@ public class RhinoAI : MonoBehaviour
         animator = GetComponent<Animator>();
         health = GetComponent<GetHealth>();
         weapon = GetComponent<Weapon>();
+        invincibility = GetComponent<Invincibility>();
         player = GameObject.FindWithTag("Player");
         foods = new List<Food>(GameObject.FindObjectsOfType<Food>());
     }
@@ -50,6 +56,7 @@ public class RhinoAI : MonoBehaviour
             )
         );
         agent.updatePosition = false;
+        agent.isStopped = true;
     }
 
     void Update()
@@ -81,9 +88,10 @@ public class RhinoAI : MonoBehaviour
 
     void OnWeaponHit(Weapon weapon)
     {
-        if (!(fsm.state is HitState) && !(fsm.state is DeadState))
+        if (health.hp > 0f && !invincibility.IsInvincible())
         {
             health.LoseHealth(weapon.Damage);
+
             if (health.hp <= 0f)
             {
                 fsm.TransitionTo(new DeadState(this));
@@ -91,13 +99,9 @@ public class RhinoAI : MonoBehaviour
             else
             {
                 fsm.TransitionTo(new HitState(this));
+                invincibility.SetInvincibleFor(invincibilityDuration);
             }
         }
-    }
-
-    bool IsAnimationPlaying(string tag)
-    {
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag(tag);
     }
 
     bool IsVisible(Vector3 target)
@@ -175,6 +179,11 @@ public class RhinoAI : MonoBehaviour
         return angle >= -facingAngleTolerance && angle <= facingAngleTolerance;
     }
 
+    public bool IsAnimationPlaying(string tag)
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag(tag);
+    }
+
     static Vector3 GetTargetPosition(GameObject gameObject)
     {
         if (gameObject.TryGetComponent<Rigidbody>(out Rigidbody rb))
@@ -250,6 +259,7 @@ public class RhinoAI : MonoBehaviour
     private class HitState : FSMState
     {
         private RhinoAI ai;
+        private bool animationQueued;
 
         public HitState(RhinoAI ai)
         {
@@ -258,18 +268,19 @@ public class RhinoAI : MonoBehaviour
 
         public override void Enter()
         {
-            ai.animator.SetBool("hit", true);
+            ai.animator.SetTrigger("hit");
+            animationQueued = true;
         }
 
         public override FSMState Execute()
         {
             if (ai.IsAnimationPlaying("hit"))
             {
-                ai.animator.SetBool("hit", false);
+                animationQueued = false;
             }
-            else if (!ai.animator.GetBool("hit"))
+            else if (!animationQueued)
             {
-                return new WanderState(ai);
+                return new IdleState(ai);
             }
             return this;
         }
@@ -290,6 +301,11 @@ public class RhinoAI : MonoBehaviour
             this.maxWaitTime = maxWaitTime;
             this.nextState = nextState;
             waitingSince = Time.time;
+        }
+
+        public override void Enter()
+        {
+            ai.agent.isStopped = false;
         }
 
         public override FSMState Execute()
@@ -318,6 +334,14 @@ public class RhinoAI : MonoBehaviour
                 return this;
             }
 
+            if (ai.agent.remainingDistance < ai.minTargetRadius)
+            {
+                ai.animator.SetFloat("speed", -0.28f);
+                ai.animator.SetFloat("turn", 0f);
+
+                return this;
+            }
+
             if (!ai.IsFacing(GetTargetPosition(target), out float angle))
             {
                 float maxTurn = ai.turnInPlaceSpeed * Time.deltaTime;
@@ -334,6 +358,7 @@ public class RhinoAI : MonoBehaviour
 
         public override void Exit()
         {
+            ai.agent.isStopped = true;
             ai.animator.SetFloat("speed", 0f);
             ai.animator.SetFloat("turn", 0f);
         }
@@ -352,6 +377,8 @@ public class RhinoAI : MonoBehaviour
 
         public override void Enter()
         {
+            ai.agent.isStopped = false;
+
             for (int i = 0; i < numAttempts; i++)
             {
                 Vector2 offset2 = Random.insideUnitCircle * range;
@@ -382,6 +409,7 @@ public class RhinoAI : MonoBehaviour
 
         public override void Exit()
         {
+            ai.agent.isStopped = true;
             ai.animator.SetFloat("speed", 0f);
         }
     }
@@ -423,6 +451,7 @@ public class RhinoAI : MonoBehaviour
     private class EatState : FSMState
     {
         private RhinoAI ai;
+        private bool animationQueued;
         public Food food { get; private set; }
 
         public EatState(RhinoAI ai, Food food)
@@ -433,16 +462,17 @@ public class RhinoAI : MonoBehaviour
 
         public override void Enter()
         {
-            ai.animator.SetBool("eat", true);
+            ai.animator.SetTrigger("eat");
+            animationQueued = true;
         }
 
         public override FSMState Execute()
         {
             if (ai.IsAnimationPlaying("eat"))
             {
-                ai.animator.SetBool("eat", false);
+                animationQueued = false;
             }
-            else if (!ai.animator.GetBool("eat"))
+            else if (!animationQueued)
             {
                 if (food != null)
                 {

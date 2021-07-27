@@ -4,23 +4,30 @@ using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(GetHealth))]
+[RequireComponent(typeof(Invincibility))]
 public class GolemAI : MonoBehaviour
 {
+    public float invincibilityDuration = 1f;
     public new GameObject particleSystem;
     private Animator animator;
     private GetHealth health;
+    private Invincibility invincibility;
+
+    public bool IsDead
+    {
+        get => health.hp <= 0f;
+    }
     private bool accessLock;
-    GameObject rb;
-    public bool IsDead;
+    private GameObject player;
 
     void Awake()
     {
         animator = GetComponent<Animator>();
         health = GetComponent<GetHealth>();
+        invincibility = GetComponent<Invincibility>();
         Debug.Assert(particleSystem != null, "Particle System must not be null");
-        IsDead = false;
         accessLock = false;
-        rb = GameObject.Find("Player");
+        player = GameObject.Find("Player");
     }
 
     // Update is called once per frame
@@ -28,12 +35,11 @@ public class GolemAI : MonoBehaviour
     {
         if (health.hp == 0f)
         {
-            IsDead = true;
             if (!accessLock)
             {
                 if (this.gameObject.name == "PBR_Golem (1)" || this.gameObject.name == "PBR_Golem (2)")
                 {
-                    GetBlessed gb = rb.GetComponent<GetBlessed>();
+                    GetBlessed gb = player.GetComponent<GetBlessed>();
                     gb.GainAccess();
                     accessLock = true;
                 }
@@ -46,10 +52,15 @@ public class GolemAI : MonoBehaviour
 
     void OnWeaponHit(Weapon weapon)
     {
-        if (!animator.GetCurrentAnimatorStateInfo(0).IsTag("hit"))
+        if (!invincibility.IsInvincible())
         {
             health.LoseHealth(weapon.Damage);
             animator.SetTrigger("hit");
+
+            if (health.hp > 0f)
+            {
+                invincibility.SetInvincibleFor(80f / 60f);
+            }
         }
     }
 }
