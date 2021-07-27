@@ -4,16 +4,22 @@ using UnityEngine;
 
 public class scroll1 : MonoBehaviour
 {
+    [TextArea]
+    public string text;
+    public float duration = 5f;
+
+    private bool isTriggered = false;
+
     void OnTriggerEnter(Collider c)
     {
-        if (c.attachedRigidbody != null)
+        if (!isTriggered
+            && c.attachedRigidbody != null
+            && c.attachedRigidbody.TryGetComponent<GetBlessed>(out GetBlessed gb))
         {
-            GetBlessed gb = c.attachedRigidbody.gameObject.GetComponent<GetBlessed>();
-            if (gb != null)
-            {
-                 Destroy(this.gameObject);
-                 gb.WaterFree();
-            }
+            isTriggered = true;
+            Destroy(this.gameObject);
+            gb.WaterFree();
+            ContextualText.ShowFor(text, duration);
         }
     }
 }
