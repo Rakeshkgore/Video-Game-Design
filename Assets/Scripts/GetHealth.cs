@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GetHealth : MonoBehaviour
 {
+    public string enemyName;
     public float hp = 100f;
     public float maxHp { get; private set; }
     public float mhp;
