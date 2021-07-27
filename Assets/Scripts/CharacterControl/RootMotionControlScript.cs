@@ -44,7 +44,6 @@ public class RootMotionControlScript : MonoBehaviour
     public float jumpableGroundNormalMaxAngle = 45f;
     public bool closeToJumpableGround;
     private bool jump = false;
-    private bool wasGrounded = false;
     private float drag;
     private float angularDrag;
 
@@ -70,7 +69,13 @@ public class RootMotionControlScript : MonoBehaviour
                     return true;
                 }
             }
-            return false;
+
+            //onCollisionXXX() doesn't always work for checking if the character is grounded from a playability perspective
+            //Uneven terrain can cause the player to become technically airborne, but so close the player thinks they're touching ground.
+            //Therefore, an additional raycast approach is used to check for close ground.
+            //This is good for allowing player to jump and not be frustrated that the jump button doesn't
+            //work
+            return CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
         }
     }
 
@@ -150,13 +155,6 @@ public class RootMotionControlScript : MonoBehaviour
 
         }
 
-        //onCollisionXXX() doesn't always work for checking if the character is grounded from a playability perspective
-        //Uneven terrain can cause the player to become technically airborne, but so close the player thinks they're touching ground.
-        //Therefore, an additional raycast approach is used to check for close ground.
-        //This is good for allowing player to jump and not be frustrated that the jump button doesn't
-        //work
-        bool isGrounded = IsGrounded || CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
-
         float buttonDistance = float.MaxValue;
         float buttonAngleDegrees = float.MaxValue;
 
@@ -230,22 +228,13 @@ public class RootMotionControlScript : MonoBehaviour
             throwBall = true;
         }
 
-        if (!isGrounded && wasGrounded)
-        {
-            Vector3 rootVelocity = transform.rotation * GetEstimatedVelocity();
-            float rootAngularSpeed = GetEstimatedAngularSpeed();
-            rbody.velocity = new Vector3(rootVelocity.x, rbody.velocity.y, rootVelocity.z);
-            rbody.angularVelocity = new Vector3(0f, rootAngularSpeed, 0f);
-        }
-        wasGrounded = isGrounded;
-
         GetBlessed gb = GetComponent<GetBlessed>();
         float inputTurnScale = (IsInWater && !gb.PoseidonPassed) ? inputTurnScaleInWater : 1.0f;
         float inputForwardScale = (IsInWater && !gb.PoseidonPassed) ? inputForwardScaleInWater : 1.0f;
 
         anim.SetFloat("velx", inputTurn * inputTurnScale);
         anim.SetFloat("vely", inputForward * inputForwardScale);
-        anim.SetBool("isFalling", !isGrounded);
+        anim.SetBool("isFalling", !IsGrounded);
         anim.SetBool("doButtonPress", doButtonPress);
         anim.SetBool("matchToButtonPress", doMatchToButtonPress);
         anim.SetBool("jump", jump);
@@ -391,24 +380,28 @@ public class RootMotionControlScript : MonoBehaviour
         Vector3 newRootPosition;
         Quaternion newRootRotation;
 
-        bool isGrounded = IsGrounded || CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
-        if (!isGrounded)
+        if (IsGrounded)
         {
-            return;
+            // use root motion as is
+            newRootPosition = anim.rootPosition;
+            newRootRotation = anim.rootRotation;
+
+            //TODO Here, you could scale the difference in position and rotation to make the character go faster or slower
+
+            //My additions to "add some tweaks to the playback of animations"
+            newRootPosition = Vector3.LerpUnclamped(this.transform.position, newRootPosition, rootMovementSpeed);
+            newRootRotation = Quaternion.LerpUnclamped(this.transform.rotation, newRootRotation, rootTurnSpeed);
+
+            rbody.position = newRootPosition;
+            rbody.rotation = newRootRotation;
         }
-
-        // use root motion as is
-        newRootPosition = anim.rootPosition;
-        newRootRotation = anim.rootRotation;
-
-        //TODO Here, you could scale the difference in position and rotation to make the character go faster or slower
-
-        //My additions to "add some tweaks to the playback of animations"
-        newRootPosition = Vector3.LerpUnclamped(this.transform.position, newRootPosition, rootMovementSpeed);
-        newRootRotation = Quaternion.LerpUnclamped(this.transform.rotation, newRootRotation, rootTurnSpeed);
-
-        rbody.position = newRootPosition;
-        rbody.rotation = newRootRotation;
+        else
+        {
+            Vector3 rootVelocity = GetEstimatedVelocity();
+            float rootAngularSpeed = GetEstimatedAngularSpeed();
+            rbody.velocity = new Vector3(rootVelocity.x, rbody.velocity.y, rootVelocity.z);
+            rbody.angularVelocity = new Vector3(0f, rootAngularSpeed, 0f);
+        }
     }
 
     public Vector3 GetEstimatedVelocity()
@@ -419,7 +412,7 @@ public class RootMotionControlScript : MonoBehaviour
         {
             velocity += clip.clip.averageSpeed * clip.weight;
         }
-        return velocity * rootMovementSpeed;
+        return transform.rotation * velocity * rootMovementSpeed;
     }
 
     public float GetEstimatedAngularSpeed()
@@ -435,16 +428,12 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void Jump()
     {
-        rbody.drag = 0f;
-        rbody.angularDrag = 0f;
         rbody.AddForce(new Vector3(0f, jumpVelocity, 0f), ForceMode.VelocityChange);
     }
 
     private void Land()
     {
         jump = false;
-        rbody.drag = drag;
-        rbody.angularDrag = angularDrag;
     }
 
     public bool IsAnimationPlaying(int layer, string tag)
