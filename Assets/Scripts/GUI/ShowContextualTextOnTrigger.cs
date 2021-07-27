@@ -38,4 +38,12 @@ public class ShowContextualTextOnTrigger : MonoBehaviour
             ContextualText.Hide(text);
         }
     }
+
+    void OnDestroy()
+    {
+        if (triggerCount > 0)
+        {
+            ContextualText.Hide(text);
+        }
+    }
 }

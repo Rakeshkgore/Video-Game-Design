@@ -17,7 +17,6 @@ public class GolemAI : MonoBehaviour
     {
         get => health.hp <= 0f;
     }
-    private bool accessLock;
     private GameObject player;
 
     void Awake()
@@ -26,25 +25,12 @@ public class GolemAI : MonoBehaviour
         health = GetComponent<GetHealth>();
         invincibility = GetComponent<Invincibility>();
         Debug.Assert(particleSystem != null, "Particle System must not be null");
-        accessLock = false;
         player = GameObject.Find("Player");
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (health.hp == 0f)
-        {
-            if (!accessLock)
-            {
-                if (this.gameObject.name == "PBR_Golem (1)" || this.gameObject.name == "PBR_Golem (2)")
-                {
-                    GetBlessed gb = player.GetComponent<GetBlessed>();
-                    gb.GainAccess();
-                    accessLock = true;
-                }
-            }
-        }
         animator.SetBool("throw", true);
         animator.SetBool("dead", IsDead);
         particleSystem.SetActive(IsDead);
