@@ -24,6 +24,7 @@ public class BridgeActivatation : MonoBehaviour
             animTutorialWall.SetTrigger("Descend");
             animMainWall.SetTrigger("Descend");
             gameObject.SetActive(false);
+            ObjectiveText.SetObjective("collect more powers and defeat the rhino");
         }
     }
 }

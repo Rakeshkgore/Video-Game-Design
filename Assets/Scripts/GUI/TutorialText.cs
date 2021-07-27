@@ -9,6 +9,8 @@ public class TutorialText : MonoBehaviour
     public GameObject elevatorText;
     public GameObject playerText;
     public GameObject player;
+    public GetHealth golem;
+    private CharacterInputController cinput;
     // Start is called before the first frame update
     void Start()
     {
@@ -16,6 +18,7 @@ public class TutorialText : MonoBehaviour
         golemText.gameObject.SetActive(false);
         elevatorText.gameObject.SetActive(false);
         playerText.gameObject.SetActive(true);
+        cinput = player.GetComponent<CharacterInputController>();
     }
 
     // Update is called once per frame
@@ -26,7 +29,7 @@ public class TutorialText : MonoBehaviour
         } else {
             treeText.gameObject.SetActive(false);
         }
-        if (Vector3.Distance(golemText.transform.position, player.transform.position) < 3f) {
+        if (golem.hp > 0f && Vector3.Distance(golemText.transform.position, player.transform.position) < 3f) {
             golemText.gameObject.SetActive(true);
         } else {
             golemText.gameObject.SetActive(false);
@@ -36,7 +39,7 @@ public class TutorialText : MonoBehaviour
         } else {
             elevatorText.gameObject.SetActive(false);
         }
-        if (Input.GetKeyUp (KeyCode.Z) || Input.GetKeyUp (KeyCode.Z) || Input.GetKeyUp (KeyCode.Space)) {
+        if (cinput.Jump || cinput.Forward != 0f || cinput.Turn != 0f) {
             playerText.gameObject.SetActive(false);
         }
     }

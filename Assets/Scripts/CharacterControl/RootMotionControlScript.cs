@@ -20,9 +20,9 @@ public class RootMotionControlScript : MonoBehaviour
     public float inputForwardScaleInWater = 0.6f;
     public float inputTurnScaleInWater = 0.6f;
     public float invincibilityDuration = 2f;
+    public bool canThrow = false;
 
     public GroundCheck[] additionalGroundChecks = {};
-    public GolemAI golem;
     public Lift divination;
 
     private Animator anim;
@@ -105,8 +105,6 @@ public class RootMotionControlScript : MonoBehaviour
 
         health = rbody.GetComponent<GetHealth>();
         invincibility = GetComponent<Invincibility>();
-
-        Debug.Assert(golem != null, "Golem must not be null");
     }
 
     // Use this for initialization
@@ -220,7 +218,7 @@ public class RootMotionControlScript : MonoBehaviour
         {
             dive = true;
         }
-        if (cinput.ThrowBall && golem.IsDead)
+        if (canThrow && cinput.ThrowBall)
         {
             throwBall = true;
         }
