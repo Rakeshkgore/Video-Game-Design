@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(AudioSource))]
-public class GameStarter : MonoBehaviour
+public class BackToStart : MonoBehaviour
 {
     private AudioSource clickAudio;
     public void StartGameWithSound()
@@ -20,6 +20,6 @@ public class GameStarter : MonoBehaviour
     }
     public void StartGame()
     {
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("StartGame");
     }
 }
