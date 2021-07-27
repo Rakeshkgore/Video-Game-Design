@@ -14,13 +14,15 @@ public class RhinoAI : MonoBehaviour
     public new Camera camera;
     public TriggerCount meleeHitZone;
     public Canvas canvas;
-    public float navMeshSampleRadius = 2f;
+    public float navMeshSampleRadius = 5f;
     public float minTargetRadius = 2.333f;
     public float facingAngleTolerance = 10f;
     public float turnInPlaceSpeed = 45f;
     public float playerSeekWaitTime = 3f;
     public float minIdleTimeBeforeWander = 5f;
     public float maxIdleTimeBeforeWander = 10f;
+    public float minTimeBeforeFireAttack = 10f;
+    public float maxTimeBeforeFireAttack = 15f;
     public float invincibilityDuration = 3f;
 
     private NavMeshAgent agent;
@@ -31,6 +33,7 @@ public class RhinoAI : MonoBehaviour
     private Invincibility invincibility;
     private List<Food> foods;
     private FiniteStateMachine fsm;
+    private float nextFireAttack;
 
     void Awake()
     {
@@ -57,11 +60,19 @@ public class RhinoAI : MonoBehaviour
         );
         agent.updatePosition = false;
         agent.isStopped = true;
+
+        SetNextFireAttackTime();
     }
 
     void Update()
     {
         fsm.Execute();
+
+        if (Time.time >= nextFireAttack)
+        {
+            animator.SetTrigger("fire");
+            nextFireAttack = float.PositiveInfinity;
+        }
     }
 
     void OnAnimatorMove()
@@ -104,6 +115,16 @@ public class RhinoAI : MonoBehaviour
         }
     }
 
+    void EmitFire()
+    {
+        SetNextFireAttackTime();
+    }
+
+    void SetNextFireAttackTime()
+    {
+        nextFireAttack = Time.time + Random.Range(minTimeBeforeFireAttack, maxTimeBeforeFireAttack);
+    }
+
     bool IsVisible(Vector3 target)
     {
         RaycastHit hit;
@@ -144,7 +165,7 @@ public class RhinoAI : MonoBehaviour
             return false;
         }
 
-        if (!NavMesh.CalculatePath(transform.position, targetPosition, GetNavMeshQueryFilter(), path))
+        if (!NavMesh.CalculatePath(transform.position, hit.position, GetNavMeshQueryFilter(), path))
         {
             return false;
         }
