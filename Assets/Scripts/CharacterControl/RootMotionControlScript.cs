@@ -17,13 +17,13 @@ public class RootMotionControlScript : MonoBehaviour
     public float animationSpeed = 1f;
     public float rootMovementSpeed = 1f;
     public float rootTurnSpeed = 1f;
+    public float jumpVelocity = 5f;
     public float inputForwardScaleInWater = 0.6f;
     public float inputTurnScaleInWater = 0.6f;
     public float invincibilityDuration = 2f;
     public bool canThrow = false;
 
     public GroundCheck[] additionalGroundChecks = {};
-    public Lift divination;
 
     private Animator anim;
     private Rigidbody rbody;
@@ -43,6 +43,9 @@ public class RootMotionControlScript : MonoBehaviour
     //Useful if you implement jump in the future...
     public float jumpableGroundNormalMaxAngle = 45f;
     public bool closeToJumpableGround;
+    private bool jump = false;
+    private float drag;
+    private float angularDrag;
 
 
     private int groundContactCount = 0;
@@ -105,6 +108,9 @@ public class RootMotionControlScript : MonoBehaviour
 
         health = rbody.GetComponent<GetHealth>();
         invincibility = GetComponent<Invincibility>();
+
+        drag = rbody.drag;
+        angularDrag = rbody.angularDrag;
     }
 
     // Use this for initialization
@@ -131,7 +137,6 @@ public class RootMotionControlScript : MonoBehaviour
         bool inputAction = false;
         bool doButtonPress = false;
         bool doMatchToButtonPress = false;
-        bool jump = false;
         bool attack = false;
         bool dive = false;
         bool throwBall = false;
@@ -210,11 +215,12 @@ public class RootMotionControlScript : MonoBehaviour
             }
         }
 
-        if (cinput.Jump)
+        if (!jump && cinput.Jump && IsAnimationPlaying(1, "idle"))
         {
             jump = true;
+            Jump();
         }
-        if(cinput.Dive && !divination.IsMoving)
+        if(cinput.Dive)
         {
             dive = true;
         }
@@ -224,8 +230,8 @@ public class RootMotionControlScript : MonoBehaviour
         }
 
         GetBlessed gb = GetComponent<GetBlessed>();
-        float inputTurnScale = divination.IsMoving ? 0.0f : (IsInWater && !gb.PoseidonPassed) ? inputTurnScaleInWater : 1.0f;
-        float inputForwardScale = divination.IsMoving ? 0.0f : (IsInWater && !gb.PoseidonPassed) ? inputForwardScaleInWater : 1.0f;
+        float inputTurnScale = (IsInWater && !gb.PoseidonPassed) ? inputTurnScaleInWater : 1.0f;
+        float inputForwardScale = (IsInWater && !gb.PoseidonPassed) ? inputForwardScaleInWater : 1.0f;
 
         anim.SetFloat("velx", inputTurn * inputTurnScale);
         anim.SetFloat("vely", inputForward * inputForwardScale);
@@ -387,7 +393,51 @@ public class RootMotionControlScript : MonoBehaviour
         newRootPosition = Vector3.LerpUnclamped(this.transform.position, newRootPosition, rootMovementSpeed);
         newRootRotation = Quaternion.LerpUnclamped(this.transform.rotation, newRootRotation, rootTurnSpeed);
 
-        this.transform.position = newRootPosition;
-        this.transform.rotation = newRootRotation;
+        rbody.position = newRootPosition;
+        rbody.rotation = newRootRotation;
+    }
+
+    public Vector3 GetEstimatedVelocity()
+    {
+        AnimatorClipInfo[] clips = anim.GetCurrentAnimatorClipInfo(0);
+        Vector3 velocity = Vector3.zero;
+        foreach (AnimatorClipInfo clip in clips)
+        {
+            velocity += clip.clip.averageSpeed * clip.weight;
+        }
+        return velocity * rootMovementSpeed;
+    }
+
+    public float GetEstimatedAngularSpeed()
+    {
+        AnimatorClipInfo[] clips = anim.GetCurrentAnimatorClipInfo(0);
+        float angularSpeed = 0f;
+        foreach (AnimatorClipInfo clip in clips)
+        {
+            angularSpeed += clip.clip.averageAngularSpeed * clip.weight;
+        }
+        return angularSpeed * rootTurnSpeed;
+    }
+
+    private void Jump()
+    {
+        Vector3 animVelocity = transform.rotation * GetEstimatedVelocity();
+        float animAngularSpeed = GetEstimatedAngularSpeed();
+        rbody.drag = 0f;
+        rbody.angularDrag = 0f;
+        rbody.AddForce(new Vector3(animVelocity.x, jumpVelocity, animVelocity.z), ForceMode.VelocityChange);
+        rbody.AddTorque(new Vector3(0f, animAngularSpeed, 0f), ForceMode.VelocityChange);
+    }
+
+    private void Land()
+    {
+        jump = false;
+        rbody.drag = drag;
+        rbody.angularDrag = angularDrag;
+    }
+
+    public bool IsAnimationPlaying(int layer, string tag)
+    {
+        return anim.GetCurrentAnimatorStateInfo(layer).IsTag(tag);
     }
 }
