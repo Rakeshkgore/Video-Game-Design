@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(AudioSource))]
-public class GameStarter : MonoBehaviour
+public class Credits : MonoBehaviour
 {
     private AudioSource clickAudio;
-    public void StartGameWithSound()
+    public void CreditsSceneWithSound()
     {
         StartCoroutine(btnClickSound());
     }
@@ -16,10 +16,10 @@ public class GameStarter : MonoBehaviour
         clickAudio = GetComponent<AudioSource>();
         clickAudio.Play();
         yield return new WaitForSeconds(clickAudio.clip.length*0.2f);
-        StartGame();
+        CreditsScene();
     }
-    public void StartGame()
+    public void CreditsScene()
     {
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("Credits");
     }
 }
