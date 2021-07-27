@@ -44,6 +44,7 @@ public class RootMotionControlScript : MonoBehaviour
     public float jumpableGroundNormalMaxAngle = 45f;
     public bool closeToJumpableGround;
     private bool jump = false;
+    private bool wasGrounded = false;
     private float drag;
     private float angularDrag;
 
@@ -229,6 +230,15 @@ public class RootMotionControlScript : MonoBehaviour
             throwBall = true;
         }
 
+        if (!isGrounded && wasGrounded)
+        {
+            Vector3 rootVelocity = transform.rotation * GetEstimatedVelocity();
+            float rootAngularSpeed = GetEstimatedAngularSpeed();
+            rbody.velocity = new Vector3(rootVelocity.x, rbody.velocity.y, rootVelocity.z);
+            rbody.angularVelocity = new Vector3(0f, rootAngularSpeed, 0f);
+        }
+        wasGrounded = isGrounded;
+
         GetBlessed gb = GetComponent<GetBlessed>();
         float inputTurnScale = (IsInWater && !gb.PoseidonPassed) ? inputTurnScaleInWater : 1.0f;
         float inputForwardScale = (IsInWater && !gb.PoseidonPassed) ? inputForwardScaleInWater : 1.0f;
@@ -382,6 +392,10 @@ public class RootMotionControlScript : MonoBehaviour
         Quaternion newRootRotation;
 
         bool isGrounded = IsGrounded || CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
+        if (!isGrounded)
+        {
+            return;
+        }
 
         // use root motion as is
         newRootPosition = anim.rootPosition;
@@ -421,12 +435,9 @@ public class RootMotionControlScript : MonoBehaviour
 
     private void Jump()
     {
-        Vector3 animVelocity = transform.rotation * GetEstimatedVelocity();
-        float animAngularSpeed = GetEstimatedAngularSpeed();
         rbody.drag = 0f;
         rbody.angularDrag = 0f;
-        rbody.AddForce(new Vector3(animVelocity.x, jumpVelocity, animVelocity.z), ForceMode.VelocityChange);
-        rbody.AddTorque(new Vector3(0f, animAngularSpeed, 0f), ForceMode.VelocityChange);
+        rbody.AddForce(new Vector3(0f, jumpVelocity, 0f), ForceMode.VelocityChange);
     }
 
     private void Land()
