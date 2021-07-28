@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class BridgeActivatation1 : MonoBehaviour
 {
-    private GameObject tutorialWall;
-    private GameObject mainWall;
+    public GameObject tutorialWall;
+    public GameObject mainWall;
     Animator animTutorialWall;
     Animator animMainWall;
     GameObject rb;
 
     void Awake()
     {
-        tutorialWall = GameObject.Find("Cube (50)");
-        mainWall = GameObject.Find("Cube (51)");
+        Debug.Assert(tutorialWall != null, "Tutorial Wall must not be null!");
+        Debug.Assert(mainWall != null, "Main Wall must not be null!");
         animTutorialWall = tutorialWall.GetComponent<Animator>();
         animMainWall = mainWall.GetComponent<Animator>();
         rb = GameObject.Find("Player");
