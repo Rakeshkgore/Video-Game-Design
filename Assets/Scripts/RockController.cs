@@ -28,9 +28,9 @@ public class RockController : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (weapon.IsHot && !rb.isKinematic && collision.gameObject.CompareTag("ground"))
+        if (weapon.IsHot && !rb.isKinematic)
         {
-            weapon.SetCold();
+            weapon.SetColdDeferred();
         }
     }
 }
