@@ -6,7 +6,7 @@ public class Invisibility : MonoBehaviour
 {
     public float duration = 15f;
 
-    private float invisibleUntil;
+    public float invisibleUntil { get; private set; }
 
     void Awake()
     {

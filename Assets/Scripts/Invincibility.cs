@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Invincibility : MonoBehaviour
 {
-    private float invincibleUntil;
+    public float invincibleUntil { get; private set; }
 
     void Awake()
     {
