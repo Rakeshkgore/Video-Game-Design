@@ -10,7 +10,6 @@ public class GameStarter : MonoBehaviour
     public void StartGameWithSound()
     {
         StartCoroutine(btnClickSound());
-        
     }
     IEnumerator btnClickSound()
     {

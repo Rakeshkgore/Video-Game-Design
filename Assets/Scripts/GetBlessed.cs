@@ -68,12 +68,19 @@ public class GetBlessed : MonoBehaviour
         float odd = Random.Range(0f, 1f);
         if (odd <= 0.5f)
         {
-            // Please grab any necessary reference from the weapon-related code and do here: 
-            // No specific idea yet. Maybe tweak among projectile damage, range, ammo amount, etc.
+            GameObject bc = GameObject.Find("BatCollider");
+            Weapon wp = bc.GetComponent<Weapon>();
+            wp.Damage = 15f;
+            RockThrower rt = this.gameObject.GetComponent<RockThrower>();
+            rt.launchVelocity.z = rt.launchVelocity.z / 2;
         }
         else
         {
-            // No specific idea yet. Maybe tweak among projectile damage, range, ammo amount, etc.
+            GameObject bc = GameObject.Find("BatCollider");
+            Weapon wp = bc.GetComponent<Weapon>();
+            wp.Damage = 7.5f;
+            RockThrower rt = this.gameObject.GetComponent<RockThrower>();
+            rt.launchVelocity.z = rt.launchVelocity.z * 2;
         }
     }
 }
