@@ -4,16 +4,56 @@ using UnityEngine;
 
 public class scroll3 : MonoBehaviour
 {
-    void OnTriggerEnter(Collider c)
+    [TextArea]
+    public string text;
+    private CharacterInputController cinput;
+    private GetBlessed gb;
+    private int triggerCount = 0;
+
+    void Awake()
     {
-        if (c.attachedRigidbody != null)
+        GameObject player = GameObject.Find("Player");
+        cinput = player.GetComponent<CharacterInputController>();
+        gb = player.GetComponent<GetBlessed>();
+    }
+
+    void Update()
+    {
+        if (triggerCount > 0 && !gb.TycheFortuneCollected && cinput.enabled && cinput.Bat)
         {
-            GetBlessed gb = c.attachedRigidbody.gameObject.GetComponent<GetBlessed>();
-            if (gb != null)
-            {
-                Destroy(this.transform.parent.gameObject);
-                gb.UnveilHealthFortune();
-            }
+            Destroy(this.transform.parent.gameObject);
+            ContextualText.Hide(text);
+            gb.UnveilHealthFortune();
+        }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.attachedRigidbody == null
+            || !other.attachedRigidbody.CompareTag("Player"))
+        {
+            return;
+        }
+
+        if (triggerCount == 0)
+        {
+            ContextualText.Show(text);
+        }
+        ++triggerCount;
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other.attachedRigidbody == null
+            || !other.attachedRigidbody.CompareTag("Player"))
+        {
+            return;
+        }
+
+        --triggerCount;
+        if (triggerCount == 0)
+        {
+            ContextualText.Hide(text);
         }
     }
 }

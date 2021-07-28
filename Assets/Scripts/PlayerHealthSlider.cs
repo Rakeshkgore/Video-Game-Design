@@ -18,5 +18,6 @@ public class PlayerHealthSlider : MonoBehaviour
     void Update()
     {
         playerHealthSlider.value = playerHealth.hp;
+        playerHealthSlider.maxValue = playerHealth.mhp;
     }
 }
