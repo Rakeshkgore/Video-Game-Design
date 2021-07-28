@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(RootMotionControlScript))]
 public class CharacterSoundEffects : MonoBehaviour
 {
     AudioSource audioSource;
+    RootMotionControlScript character;
     public AudioClip footstepAudio;
     public AudioClip swipeAudio;
     public AudioClip myAudio;
@@ -13,17 +15,15 @@ public class CharacterSoundEffects : MonoBehaviour
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        character = GetComponent<RootMotionControlScript>();
     }
 
     public void PlayFootstep()
     {
-        audioSource.PlayOneShot(footstepAudio, 1f);
+        if (character.IsGrounded)
+        {
+            audioSource.PlayOneShot(footstepAudio, 1f);
+        }
     }
 
     public void PlayWeaponSwipe()

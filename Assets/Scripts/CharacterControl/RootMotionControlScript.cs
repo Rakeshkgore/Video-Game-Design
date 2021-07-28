@@ -17,13 +17,13 @@ public class RootMotionControlScript : MonoBehaviour
     public float animationSpeed = 1f;
     public float rootMovementSpeed = 1f;
     public float rootTurnSpeed = 1f;
+    public float jumpVelocity = 5f;
     public float inputForwardScaleInWater = 0.6f;
     public float inputTurnScaleInWater = 0.6f;
     public float invincibilityDuration = 2f;
     public bool canThrow = false;
 
     public GroundCheck[] additionalGroundChecks = {};
-    public Lift divination;
 
     private Animator anim;
     private Rigidbody rbody;
@@ -43,6 +43,9 @@ public class RootMotionControlScript : MonoBehaviour
     //Useful if you implement jump in the future...
     public float jumpableGroundNormalMaxAngle = 45f;
     public bool closeToJumpableGround;
+    private bool jump = false;
+    private float drag;
+    private float angularDrag;
 
 
     private int groundContactCount = 0;
@@ -66,7 +69,13 @@ public class RootMotionControlScript : MonoBehaviour
                     return true;
                 }
             }
-            return false;
+
+            //onCollisionXXX() doesn't always work for checking if the character is grounded from a playability perspective
+            //Uneven terrain can cause the player to become technically airborne, but so close the player thinks they're touching ground.
+            //Therefore, an additional raycast approach is used to check for close ground.
+            //This is good for allowing player to jump and not be frustrated that the jump button doesn't
+            //work
+            return CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
         }
     }
 
@@ -105,6 +114,9 @@ public class RootMotionControlScript : MonoBehaviour
 
         health = rbody.GetComponent<GetHealth>();
         invincibility = GetComponent<Invincibility>();
+
+        drag = rbody.drag;
+        angularDrag = rbody.angularDrag;
     }
 
     // Use this for initialization
@@ -131,7 +143,6 @@ public class RootMotionControlScript : MonoBehaviour
         bool inputAction = false;
         bool doButtonPress = false;
         bool doMatchToButtonPress = false;
-        bool jump = false;
         bool attack = false;
         bool dive = false;
         bool throwBall = false;
@@ -143,13 +154,6 @@ public class RootMotionControlScript : MonoBehaviour
             inputAction = cinput.Bat;
 
         }
-
-        //onCollisionXXX() doesn't always work for checking if the character is grounded from a playability perspective
-        //Uneven terrain can cause the player to become technically airborne, but so close the player thinks they're touching ground.
-        //Therefore, an additional raycast approach is used to check for close ground.
-        //This is good for allowing player to jump and not be frustrated that the jump button doesn't
-        //work
-        bool isGrounded = IsGrounded || CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
 
         float buttonDistance = float.MaxValue;
         float buttonAngleDegrees = float.MaxValue;
@@ -210,11 +214,12 @@ public class RootMotionControlScript : MonoBehaviour
             }
         }
 
-        if (cinput.Jump)
+        if (!jump && cinput.Jump && IsAnimationPlaying(1, "idle"))
         {
             jump = true;
+            Jump();
         }
-        if(cinput.Dive && !divination.IsMoving)
+        if(cinput.Dive)
         {
             dive = true;
         }
@@ -224,12 +229,12 @@ public class RootMotionControlScript : MonoBehaviour
         }
 
         GetBlessed gb = GetComponent<GetBlessed>();
-        float inputTurnScale = divination.IsMoving ? 0.0f : (IsInWater && !gb.PoseidonPassed) ? inputTurnScaleInWater : 1.0f;
-        float inputForwardScale = divination.IsMoving ? 0.0f : (IsInWater && !gb.PoseidonPassed) ? inputForwardScaleInWater : 1.0f;
+        float inputTurnScale = (IsInWater && !gb.PoseidonPassed) ? inputTurnScaleInWater : 1.0f;
+        float inputForwardScale = (IsInWater && !gb.PoseidonPassed) ? inputForwardScaleInWater : 1.0f;
 
         anim.SetFloat("velx", inputTurn * inputTurnScale);
         anim.SetFloat("vely", inputForward * inputForwardScale);
-        anim.SetBool("isFalling", !isGrounded);
+        anim.SetBool("isFalling", !IsGrounded);
         anim.SetBool("doButtonPress", doButtonPress);
         anim.SetBool("matchToButtonPress", doMatchToButtonPress);
         anim.SetBool("jump", jump);
@@ -375,19 +380,64 @@ public class RootMotionControlScript : MonoBehaviour
         Vector3 newRootPosition;
         Quaternion newRootRotation;
 
-        bool isGrounded = IsGrounded || CharacterCommon.CheckGroundNear(this.transform.position, jumpableGroundNormalMaxAngle, 0.1f, 1f, out closeToJumpableGround);
+        if (IsGrounded)
+        {
+            // use root motion as is
+            newRootPosition = anim.rootPosition;
+            newRootRotation = anim.rootRotation;
 
-        // use root motion as is
-        newRootPosition = anim.rootPosition;
-        newRootRotation = anim.rootRotation;
+            //TODO Here, you could scale the difference in position and rotation to make the character go faster or slower
 
-        //TODO Here, you could scale the difference in position and rotation to make the character go faster or slower
+            //My additions to "add some tweaks to the playback of animations"
+            newRootPosition = Vector3.LerpUnclamped(this.transform.position, newRootPosition, rootMovementSpeed);
+            newRootRotation = Quaternion.LerpUnclamped(this.transform.rotation, newRootRotation, rootTurnSpeed);
 
-        //My additions to "add some tweaks to the playback of animations"
-        newRootPosition = Vector3.LerpUnclamped(this.transform.position, newRootPosition, rootMovementSpeed);
-        newRootRotation = Quaternion.LerpUnclamped(this.transform.rotation, newRootRotation, rootTurnSpeed);
+            this.transform.position = newRootPosition;
+            this.transform.rotation = newRootRotation;
+        }
+        else
+        {
+            Vector3 rootVelocity = GetEstimatedVelocity();
+            float rootAngularSpeed = GetEstimatedAngularSpeed();
+            rbody.velocity = new Vector3(rootVelocity.x, rbody.velocity.y, rootVelocity.z);
+            rbody.angularVelocity = new Vector3(0f, rootAngularSpeed, 0f);
+        }
+    }
 
-        this.transform.position = newRootPosition;
-        this.transform.rotation = newRootRotation;
+    public Vector3 GetEstimatedVelocity()
+    {
+        AnimatorClipInfo[] clips = anim.GetCurrentAnimatorClipInfo(0);
+        Vector3 velocity = Vector3.zero;
+        foreach (AnimatorClipInfo clip in clips)
+        {
+            velocity += clip.clip.averageSpeed * clip.weight;
+        }
+        return transform.rotation * velocity * rootMovementSpeed;
+    }
+
+    public float GetEstimatedAngularSpeed()
+    {
+        AnimatorClipInfo[] clips = anim.GetCurrentAnimatorClipInfo(0);
+        float angularSpeed = 0f;
+        foreach (AnimatorClipInfo clip in clips)
+        {
+            angularSpeed += clip.clip.averageAngularSpeed * clip.weight;
+        }
+        return angularSpeed * rootTurnSpeed;
+    }
+
+    private void Jump()
+    {
+        rbody.AddForce(new Vector3(0f, jumpVelocity, 0f), ForceMode.VelocityChange);
+    }
+
+    private void Land()
+    {
+        jump = false;
+    }
+
+    public bool IsAnimationPlaying(int layer, string tag)
+    {
+        return anim.GetCurrentAnimatorStateInfo(layer).IsTag(tag);
     }
 }
