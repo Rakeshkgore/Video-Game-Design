@@ -4,45 +4,58 @@ using UnityEngine;
 using UnityEngine.UI;
 public class EnemyHealthSlider : MonoBehaviour
 {
+    public float maxEnemyDistance = 30f;
     public Slider enemyHealthSlider;
     public GameObject enemyHealthFillArea;
     public Text enemyHealthText;
-    public GetHealth golemHealth;
-    public GetHealth rhinoHealth;
+    public GetHealth[] enemies;
     public Transform player;
     public Camera mainCamera;
-    // Start is called before the first frame update
-    void Start()
+
+    void Awake()
     {
         enemyHealthSlider = GetComponent<Slider>();
-
-        enemyHealthSlider.value = golemHealth.maxHp;
+        enemies = FindObjectsOfType<GetHealth>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        string currentEnemyName;
-        float currentEnemyHp;
-        float currentEnemyMaxHp;
-        bool showHealthBar;
+        bool showHealthBar = false;
+        string currentEnemyName = "";
+        float currentEnemyDistance = float.PositiveInfinity;
+        float currentEnemyHp = 1f;
+        float currentEnemyMaxHp = 1f;
 
-        if (player.position.x < -34.33073) // FIXME
+        foreach (GetHealth enemy in enemies)
         {
-            currentEnemyName = "Rock Golem";
-            currentEnemyHp = golemHealth.hp;
-            currentEnemyMaxHp = golemHealth.maxHp;
-            showHealthBar = currentEnemyHp > 0f && (
-                currentEnemyHp < currentEnemyMaxHp
-                || IsVisibleToPlayer(golemHealth.transform.position)
-            );
-        }
-        else
-        {
-            currentEnemyName = "Rhino";
-            currentEnemyHp = rhinoHealth.hp;
-            currentEnemyMaxHp = rhinoHealth.maxHp;
-            showHealthBar = currentEnemyHp > 0f;
+            float enemyHp = enemy.hp;
+            if (enemy.hp <= 0f)
+            {
+                continue;
+            }
+
+            string enemyName = enemy.enemyName;
+            if (string.IsNullOrEmpty(enemyName))
+            {
+                continue;
+            }
+
+            Vector3 enemyPosition = enemy.transform.position;
+            if (!IsVisibleToPlayer(enemyPosition))
+            {
+                continue;
+            }
+
+            float enemyDistance = Vector3.Distance(player.position, enemyPosition);
+            if (enemyDistance <= maxEnemyDistance && enemyDistance < currentEnemyDistance)
+            {
+                showHealthBar = true;
+                currentEnemyName = enemyName;
+                currentEnemyDistance = enemyDistance;
+                currentEnemyHp = enemyHp;
+                currentEnemyMaxHp = enemy.mhp;
+            }
         }
 
         enemyHealthText.gameObject.SetActive(showHealthBar);
@@ -57,10 +70,10 @@ public class EnemyHealthSlider : MonoBehaviour
     {
         Vector3 viewportPoint = mainCamera.WorldToViewportPoint(point);
         return (
-            viewportPoint.x >= 0f
-            && viewportPoint.x <= 1f
-            && viewportPoint.y >= 0f
-            && viewportPoint.y <= 1f
+            viewportPoint.x >= 0.1f
+            && viewportPoint.x <= 0.9f
+            && viewportPoint.y >= 0.1f
+            && viewportPoint.y <= 0.9f
             && viewportPoint.z >= mainCamera.nearClipPlane
             && viewportPoint.z <= mainCamera.farClipPlane
         );
