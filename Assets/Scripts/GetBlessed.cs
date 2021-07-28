@@ -28,8 +28,6 @@ public class GetBlessed : MonoBehaviour
     public void Invisible()
     {
         DaedalusPassed = true;
-        // [TO DO] Grab the reference of this boolean value in the code for Rhino AI, player, piles, or whatever required for - when the value is set true - making the rhino blind
-        // to spot the player (could be represented by transparency) for the coming 15 sedonds after the player approaches any pile of rocks (whether intact or not) in the main arena.
     }
 
     public void UnveilHealthFortune()

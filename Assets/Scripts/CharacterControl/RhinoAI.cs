@@ -32,6 +32,7 @@ public class RhinoAI : MonoBehaviour
     private GameObject player;
     private GetBlessed playerBlessed;
     private Invincibility playerInvincibility;
+    private Invisibility playerInvisibility;
     private GetHealth health;
     private Weapon weapon;
     private Invincibility invincibility;
@@ -49,6 +50,7 @@ public class RhinoAI : MonoBehaviour
         player = GameObject.FindWithTag("Player");
         playerBlessed = player.GetComponent<GetBlessed>();
         playerInvincibility = player.GetComponent<Invincibility>();
+        playerInvisibility = player.GetComponent<Invisibility>();
         foods = new List<Food>(GameObject.FindObjectsOfType<Food>());
     }
 
@@ -178,7 +180,7 @@ public class RhinoAI : MonoBehaviour
 
     bool IsPlayerGoodTarget(out NavMeshPath path)
     {
-        if (invincibility.IsInvincible() || playerInvincibility.IsInvincible())
+        if (invincibility.IsInvincible() || playerInvisibility.IsInvisible() || playerInvincibility.IsInvincible())
         {
             path = new NavMeshPath();
             return false;
