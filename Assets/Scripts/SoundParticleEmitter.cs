@@ -16,7 +16,7 @@ public class SoundParticleEmitter : MonoBehaviour
 
     void Update()
     {
-        if (rhino.IsAnimationPlaying("hit"))
+        if (rhino.IsAnimationPlaying("shout") || rhino.IsAnimationPlaying("hit"))
         {
             if (float.IsNaN(nextEmitTime))
             {
