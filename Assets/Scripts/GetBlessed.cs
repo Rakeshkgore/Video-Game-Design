@@ -54,12 +54,20 @@ public class GetBlessed : MonoBehaviour
         float odd = Random.Range(0f, 1f);
         if (odd <= 0.5f)
         {
-            // Please grab any necessary reference from the weapon-related code and do here: 
-            // Melee damage +50%, and attackanim.speed lower.
+            GameObject bc = GameObject.Find("BatCollider");
+            Weapon wp = bc.GetComponent<Weapon>();
+            wp.Damage = 15f;
+            Animator anim = this.gameObject.GetComponent<Animator>();
+            anim.SetFloat("animSpeed", 0.8f);
         }
         else
         {
-            // attackanim.speed higher, melee damage -25%.
+
+            GameObject bc = GameObject.Find("BatCollider");
+            Weapon wp = bc.GetComponent<Weapon>();
+            wp.Damage = 7.5f;
+            Animator anim = this.gameObject.GetComponent<Animator>();
+            anim.SetFloat("animSpeed", 1.6f);
         }
     }
 
@@ -68,18 +76,14 @@ public class GetBlessed : MonoBehaviour
         float odd = Random.Range(0f, 1f);
         if (odd <= 0.5f)
         {
-            GameObject bc = GameObject.Find("BatCollider");
-            Weapon wp = bc.GetComponent<Weapon>();
-            wp.Damage = 15f;
             RockThrower rt = this.gameObject.GetComponent<RockThrower>();
             rt.launchVelocity.z = rt.launchVelocity.z / 2;
+            rt.rockPrefab.GetComponent<Weapon>().Damage = 10f;
         }
         else
         {
-            GameObject bc = GameObject.Find("BatCollider");
-            Weapon wp = bc.GetComponent<Weapon>();
-            wp.Damage = 7.5f;
             RockThrower rt = this.gameObject.GetComponent<RockThrower>();
+            rt.rockPrefab.GetComponent<Weapon>().Damage = 4f;
             rt.launchVelocity.z = rt.launchVelocity.z * 2;
         }
     }
